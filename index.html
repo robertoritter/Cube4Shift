@@ -327,6 +327,11 @@ body.printing #printFoot{display:flex;justify-content:flex-end;margin-top:2px}
       <div class="field"><label data-i18n="co.defHours"></label><input type="number" id="defHours" min="1" max="70"></div>
       <div class="field"><label data-i18n="co.defDays"></label><input type="number" id="defDays" min="1" max="7"></div>
     </div>
+    <div class="row" style="margin-top:14px;gap:12px;align-items:flex-start">
+      <div class="field"><label data-i18n="co.dayOffMode"></label><select id="dayOffMode"><option value="auto" data-i18n="co.dayOffAuto"></option><option value="rotate" data-i18n="co.dayOffRotate"></option></select></div>
+      <div class="field" id="dayOffDaysBox"><label data-i18n="co.dayOffDays"></label><div class="daychk" id="dayOffDays"></div></div>
+      <span class="muted" style="max-width:520px;font-size:12px" data-i18n="co.dayOffSub"></span>
+    </div>
     <div class="row" style="margin-top:14px;gap:8px"><div class="field"><label data-i18n="co.sundayOff"></label><input type="number" id="sundayOffMin" min="0" max="5"></div><span class="muted" style="max-width:720px" data-i18n="co.sundayOffSub"></span></div>
     <label class="row" style="margin-top:14px;gap:8px;cursor:pointer"><input type="checkbox" id="fillHours"> <span><b data-i18n="co.fillHours"></b><br><span class="muted" data-i18n="co.fillHoursSub"></span></span></label>
     <p class="muted" style="margin:12px 0 0" data-i18n="co.partialNote"></p>
@@ -400,6 +405,7 @@ body.printing #printFoot{display:flex;justify-content:flex-end;margin-top:2px}
       <div class="field"><label data-i18n="emp.role"></label><input id="eRole"></div>
       <div class="field"><label data-i18n="emp.maxHours"></label><input type="number" id="eHours" min="1" max="70"></div>
       <div class="field"><label data-i18n="emp.maxDays"></label><input type="number" id="eDays" min="1" max="7"></div>
+      <div class="field" style="grid-column:1/-1"><label data-i18n="emp.offDays"></label><div class="daychk" id="eOffDays"></div><span class="muted" style="font-size:12px" data-i18n="emp.offDaysSub"></span></div>
       <div class="field"><label data-i18n="emp.status"></label><select id="eActive"><option value="1" data-i18n="emp.active"></option><option value="0" data-i18n="emp.inactiveOpt"></option></select></div>
     </div>
     <h3 style="margin-top:20px" data-i18n="emp.restTitle"></h3>
@@ -483,9 +489,15 @@ en:{
   'sch.gapsHelp':'To fix: add more people, raise weekly limits, lower minimum coverage or review the restrictions.',
   'st.people':'people in the schedule','st.shifts':'shifts','st.hours':'hours allocated','st.cov':'days with full coverage',
   'months':['January','February','March','April','May','June','July','August','September','October','November','December'],
+'co.dayOffMode':'Weekly day off','co.dayOffAuto':'Automatic','co.dayOffRotate':'Rotation over the days below','co.dayOffDays':'Days allowed for the rotation',
+  'co.dayOffSub':'In rotation, each person\'s day off moves to the next allowed day every week (Mon, then Tue, then Wed...), people start on different days, and the sequence continues from the previous saved schedule. Weeks where the person is already off (Sunday off, restriction, closed day) skip the rotation.',
+  'emp.offDays':'Preferred days off (rotation)','emp.offDaysSub':'Empty = uses the company days. Several days = rotates among them; one day = always that day.','emp.offPill':'Day off: {d}',
+  'io.errOff':'preferred days off not understood: "{x}"',
+  'v.rotation':'{n}: rotation day off was {d}, but the person works that day (coverage or manual change)',
   'co.sundayOff':'Sundays off per month (minimum)','co.sundayOffSub':'Each person gets at least this many Sundays off in every month, in rotation so no Sunday is left short. People already off on Sundays by restriction (e.g. alternating weekends) count automatically. Checked in monthly schedules; 0 turns it off.',
   'v.sunday':'{n}: {k} Sunday(s) off in {m} (minimum {q})',
-'st.draft':'Draft','st.closed':'Closed on {d}','st.manual':'{n} manual change(s)','st.manualTip':'Days changed by hand are kept when recalculating (violet dot). Grey dot: day inherited from a neighbouring saved schedule.',
+'st.stale':'{l} uses an older version of the shared week: open it and recalculate','st.staleTip':'The week shared with the next schedule changed here. Open the next schedule and click Recalculate to take this version.',
+  'st.draft':'Draft','st.closed':'Closed on {d}','st.manual':'{n} manual change(s)','st.manualTip':'Days changed by hand are kept when recalculating (violet dot). Grey dot: day inherited from a neighbouring saved schedule.',
   'st.saved':'Saved schedules','st.recalc':'Recalculate','st.recalcTip':'Redo the automatic part keeping every manual change','st.close':'Close schedule','st.reopen':'Reopen',
   'st.recalcConfirm':'Recalculate this schedule? The {n} manual change(s) and the days inherited from neighbouring schedules are kept; the rest is redone.',
   'st.recalcDone':'Schedule recalculated keeping {n} manual change(s)','st.closeConfirm':'Close this schedule? It becomes final: no changes until it is reopened, and the next schedules use it as reference.',
@@ -561,7 +573,7 @@ en:{
   'io.coDone':'Company settings imported','io.coConfirm':'Replace the current company settings?','io.coInvalid':'Invalid company data',
   'io.fmtHtml':'<p>One row per employee. Separator <code>;</code> or <code>,</code> (detected automatically). Columns: <code>name;role;max_hours_week;max_days_week;active;restrictions</code>. Active accepts yes/no, sim/não, 1/0.</p><p>Restrictions go in a single column, separated by <code>|</code>. Each item is <i>days</i> + <i>rule</i> + optional <i>(reason)</i>:</p><ul><li><code>Mon,Wed,Fri after 15:00 (College)</code></li><li><code>Sun off</code></li><li><code>all before 10:00</code></li><li><code>Tue between 12:00-14:00</code></li><li><code>2026-12-24..2026-12-26 off (Holidays)</code> one-off period</li></ul><p>Days accept English or Portuguese (Mon/Seg, Tue/Ter...). Rules: off, after, before, between (or indisponível, depois, antes, entre).</p>',
   'io.tplNote':'Course',
-  'io.hdr':['name','role','max_hours_week','max_days_week','active','restrictions'],'io.yes':'yes','io.no':'no','io.all':'all',
+  'io.hdr':['name','role','max_hours_week','max_days_week','active','restrictions','preferred_days_off'],'io.yes':'yes','io.no':'no','io.all':'all',
   'io.kw':{off:'off',after:'after',before:'before',between:'between',only:'only',alt:'alternate'},
   'data.backup':'Full backup','data.export':'Show JSON','data.copy':'Copy','data.import':'Import pasted JSON','data.reset':'Restore sample data',
   'data.ph':'Paste a backup here to import',
@@ -604,9 +616,15 @@ pt:{
   'sch.gapsHelp':'Para resolver: cadastre mais pessoas, aumente limites semanais, reduza a cobertura mínima ou revise as restrições.',
   'st.people':'pessoas na escala','st.shifts':'turnos','st.hours':'horas alocadas','st.cov':'dias com cobertura completa',
   'months':['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'],
+'co.dayOffMode':'Folga semanal','co.dayOffAuto':'Automática','co.dayOffRotate':'Rodízio nos dias abaixo','co.dayOffDays':'Dias permitidos para o rodízio',
+  'co.dayOffSub':'No rodízio, a folga de cada pessoa passa para o próximo dia permitido a cada semana (segunda, depois terça, depois quarta...), as pessoas começam em dias diferentes e a sequência continua da escala anterior salva. Semanas em que a pessoa já folga (domingo de folga, restrição, empresa fechada) pulam o rodízio.',
+  'emp.offDays':'Dias preferidos para a folga (rodízio)','emp.offDaysSub':'Vazio = usa os dias da empresa. Vários dias = reveza entre eles; um dia só = sempre esse dia.','emp.offPill':'Folga: {d}',
+  'io.errOff':'folgas preferidas não entendidas: "{x}"',
+  'v.rotation':'{n}: a folga do rodízio era {d}, mas a pessoa trabalha nesse dia (cobertura ou ajuste manual)',
   'co.sundayOff':'Domingos de folga por mês (mínimo)','co.sundayOffSub':'Cada pessoa tem pelo menos essa quantidade de domingos de folga em todo mês, em rodízio para nenhum domingo ficar desfalcado. Quem já folga aos domingos por restrição (ex.: fins de semana alternados) conta automaticamente. Verificado na escala mensal; 0 desliga a regra.',
   'v.sunday':'{n}: {k} domingo(s) de folga em {m} (mínimo {q})',
-'st.draft':'Rascunho','st.closed':'Fechada em {d}','st.manual':'{n} ajuste(s) manual(is)','st.manualTip':'Dias alterados à mão são mantidos ao recalcular (ponto violeta). Ponto cinza: dia herdado de uma escala vizinha salva.',
+'st.stale':'{l} usa uma versão antiga da semana compartilhada: abra e recalcule','st.staleTip':'A semana compartilhada com a escala seguinte mudou aqui. Abra a escala seguinte e clique em Recalcular para pegar esta versão.',
+  'st.draft':'Rascunho','st.closed':'Fechada em {d}','st.manual':'{n} ajuste(s) manual(is)','st.manualTip':'Dias alterados à mão são mantidos ao recalcular (ponto violeta). Ponto cinza: dia herdado de uma escala vizinha salva.',
   'st.saved':'Escalas salvas','st.recalc':'Recalcular','st.recalcTip':'Refaz a parte automática mantendo todos os ajustes manuais','st.close':'Fechar escala','st.reopen':'Reabrir',
   'st.recalcConfirm':'Recalcular esta escala? Os {n} ajuste(s) manual(is) e os dias herdados de escalas vizinhas são mantidos; o resto é refeito.',
   'st.recalcDone':'Escala recalculada mantendo {n} ajuste(s) manual(is)','st.closeConfirm':'Fechar esta escala? Ela fica definitiva: sem alterações até ser reaberta, e as próximas escalas passam a usá-la como referência.',
@@ -682,7 +700,7 @@ pt:{
   'io.coDone':'Configuração da empresa importada','io.coConfirm':'Substituir a configuração atual da empresa?','io.coInvalid':'Dados da empresa inválidos',
   'io.fmtHtml':'<p>Uma linha por funcionário. Separador <code>;</code> ou <code>,</code> (detectado automaticamente). Colunas: <code>nome;cargo;max_horas_semana;max_dias_semana;ativo;restricoes</code>. Ativo aceita sim/não, yes/no, 1/0.</p><p>As restrições ficam numa coluna só, separadas por <code>|</code>. Cada item é <i>dias</i> + <i>regra</i> + <i>(motivo)</i> opcional:</p><ul><li><code>Seg,Qua,Sex depois 15:00 (Faculdade)</code></li><li><code>Dom indisponível</code></li><li><code>todos antes 10:00</code></li><li><code>Ter entre 12:00-14:00</code></li><li><code>2026-12-24..2026-12-26 indisponível (Festas)</code> período pontual</li></ul><p>Dias aceitam português ou inglês (Seg/Mon, Ter/Tue...). Regras: indisponível, depois, antes, entre (ou off, after, before, between).</p>',
   'io.tplNote':'Curso',
-  'io.hdr':['nome','cargo','max_horas_semana','max_dias_semana','ativo','restricoes'],'io.yes':'sim','io.no':'não','io.all':'todos',
+  'io.hdr':['nome','cargo','max_horas_semana','max_dias_semana','ativo','restricoes','folgas_preferidas'],'io.yes':'sim','io.no':'não','io.all':'todos',
   'io.kw':{off:'indisponível',after:'depois',before:'antes',between:'entre',only:'somente',alt:'alterna'},
   'data.backup':'Backup completo','data.export':'Mostrar JSON','data.copy':'Copiar','data.import':'Importar JSON colado','data.reset':'Restaurar dados de exemplo',
   'data.ph':'Cole aqui um backup para importar',
@@ -909,6 +927,13 @@ function renderCompany(){
   });
   $('#compTable').querySelectorAll('input[data-k=minStaff]').forEach(inp=>inp.onblur=()=>{inp.value=c.days[inp.dataset.i].minStaff;});
   renderRoleRules();renderHolidays();
+  $('#dayOffMode').value=c.dayOffMode||'auto';
+  const paintOffDays=()=>{const sel=c.dayOffDays&&c.dayOffDays.length?c.dayOffDays:[0,1,2,3,4];
+    $('#dayOffDays').innerHTML=D().map((d,i)=>`<label><input type="checkbox" data-od="${i}" ${sel.includes(i)?'checked':''}>${d}</label>`).join('');
+    $('#dayOffDaysBox').style.opacity=$('#dayOffMode').value==='rotate'?1:.45;
+    $('#dayOffDays').querySelectorAll('[data-od]').forEach(cb=>cb.onchange=()=>{const v=[...$('#dayOffDays').querySelectorAll('[data-od]:checked')].map(x=>+x.dataset.od);if(!v.length){cb.checked=true;return;}c.dayOffDays=v;save();});};
+  paintOffDays();
+  $('#dayOffMode').onchange=()=>{c.dayOffMode=$('#dayOffMode').value;save();paintOffDays();};
   $('#sundayOffMin').value=sundayOffMin();$('#sundayOffMin').onchange=()=>{c.sundayOffMin=Math.max(0,Math.min(5,+$('#sundayOffMin').value||0));$('#sundayOffMin').value=c.sundayOffMin;save();};
   $('#fillHours').checked=c.fillHours!==false;$('#fillHours').onchange=()=>{c.fillHours=$('#fillHours').checked;save();};
   ['shiftHours','minPartial','minRest','defHours','defDays'].forEach(k=>{const el=$('#'+k);el.value=c[k];el.onchange=()=>{c[k]=+el.value;save();};});
@@ -956,8 +981,9 @@ function renderEmployees(){
   let h=`<tr><th>${t('emp.colName')}</th><th>${t('emp.colRole')}</th><th>${t('emp.colLimits')}</th><th>${t('emp.colRest')}</th><th></th></tr>`;
   list.forEach(e=>{
     const rs=e.restrictions.map(r=>`<span class="pill ${r.kind==='one'?'warn':''}" title="${esc(r.note||'')}">${restLabel(r)}</span>`).join('')||`<span class="muted">${t('emp.noRest')}</span>`;
+    const od=(e.offDays&&e.offDays.length)?`<span class="pill ok">${t('emp.offPill',{d:e.offDays.map(i=>D()[i]).join(', ')})}</span>`:'';
     h+=`<tr><td><b>${esc(e.name)}</b>${e.active?'':` <span class="pill bad">${t('emp.inactive')}</span>`}</td><td>${esc(e.role||'')}</td>
-    <td class="muted">${t('emp.limits',{h:e.maxHours,d:e.maxDays})}</td><td>${rs}</td>
+    <td class="muted">${t('emp.limits',{h:e.maxHours,d:e.maxDays})}</td><td>${od}${rs}</td>
     <td style="white-space:nowrap"><button class="btn sm" data-edit="${e.id}">${t('btn.edit')}</button> <button class="btn sm danger" data-del="${e.id}">${t('btn.delete')}</button></td></tr>`;
   });
   $('#empTable').innerHTML=h;
@@ -975,6 +1001,7 @@ function openEmp(id){
   editing=id?JSON.parse(JSON.stringify(state.employees.find(e=>e.id===id))):{id:uid(),name:'',role:'',maxHours:c.defHours,maxDays:c.defDays,active:true,restrictions:[]};
   editing._isNew=!id;
   $('#empModalTitle').textContent=id?t('emp.editTitle'):t('emp.newTitle');
+  $('#eOffDays').innerHTML=D().map((d,i)=>`<label><input type="checkbox" data-eod="${i}" ${(editing.offDays||[]).includes(i)?'checked':''}>${d}</label>`).join('');
   $('#eName').value=editing.name;$('#eRole').value=editing.role||'';$('#eHours').value=editing.maxHours;$('#eDays').value=editing.maxDays;$('#eActive').value=editing.active?'1':'0';
   renderRest();$('#empModal').classList.add('open');$('#eName').focus();
 }
@@ -1025,6 +1052,7 @@ $('#btnSave').onclick=()=>{
   if(bad){toast(t('emp.needRest'));return;}
   editing.restrictions.forEach(r=>{if(r.kind==='one'&&(!r.to||r.to<r.from))r.to=r.from;});
   delete editing._isNew;
+  editing.offDays=[...$('#eOffDays').querySelectorAll('[data-eod]:checked')].map(x=>+x.dataset.eod);
   Object.assign(editing,{name,role:$('#eRole').value.trim(),maxHours:+$('#eHours').value||44,maxDays:Math.min(7,+$('#eDays').value||6),active:$('#eActive').value==='1'});
   const i=state.employees.findIndex(e=>e.id===editing.id);
   if(i>=0)state.employees[i]=editing;else state.employees.push(editing);
@@ -1084,8 +1112,9 @@ function activeRoleRules(){return (state.company.roleRules||[]).filter(r=>r.role
 // how many people of a role (or anyone, role=null) work at minute x, given a list of {emp,s,e}
 function countAt(list,x,role){let n=0;for(const a of list)if(a.s<=x&&a.e>x&&(role==null||roleKey(a.emp)===role))n++;return n;}
 // Other saved schedules covering a date (closed ones first, then the most recently changed)
-function otherSchedFor(iso,exceptKey){
-  return Object.values(state.schedules||{}).filter(x=>x.key!==exceptKey&&x.start<=iso&&iso<=x.end)
+// beforeStart: only schedules that start earlier (the shared week always comes from the previous period)
+function otherSchedFor(iso,exceptKey,beforeStart){
+  return Object.values(state.schedules||{}).filter(x=>x.key!==exceptKey&&x.start<=iso&&iso<=x.end&&(!beforeStart||x.start<beforeStart))
     .sort((a,b)=>((b.closed?1:0)-(a.closed?1:0))||String(b.updatedAt||'').localeCompare(String(a.updatedAt||'')))[0]||null;
 }
 function ctxShift(eid,iso,exceptKey){const s=otherSchedFor(iso,exceptKey);return s&&s.assign[eid]?s.assign[eid][iso]||null:null;}
@@ -1126,6 +1155,38 @@ function planSundays(start,end,emps,fixedFn,lockedFn){
   });
   return prot;
 }
+// Weekly day off in rotation: each person's day off moves to the next allowed day every week
+// (Mon, then Tue, then Wed...), people start on different days, and the sequence continues
+// from the previous saved schedule. Weeks where the person is already off (Sunday off,
+// restriction, closed day, manual day off) do not use a rotation day.
+const dayOffPool=emp=>{const c=state.company,base=(c.dayOffDays&&c.dayOffDays.length?c.dayOffDays:[0,1,2,3,4]);return (emp.offDays&&emp.offDays.length?emp.offDays:base).slice().sort((a,b)=>a-b);};
+function planWeekOffs(start,end,emps,sunProt,fixedFn,lockedFn,key){
+  const prot={};if(state.company.dayOffMode!=='rotate')return prot;
+  [...emps].sort((a,b)=>a.name.localeCompare(b.name)).forEach((e,idx)=>{
+    const pool=dayOffPool(e);if(!pool.length)return;
+    // continue after the last rotation day found in earlier saved schedules
+    let next=null;
+    for(let w=1;w<=8&&next==null;w++){
+      const mon=addDays(monday(start),-7*w);
+      for(const pd of pool){const x=addDays(mon,pd),iso=dIso(x);if(otherSchedFor(iso,key)&&dayOpen(x)&&!offAllDay(e,x)&&!ctxShift(e.id,iso,key)){next=(pool.indexOf(pd)+1)%pool.length;}}
+    }
+    if(next==null)next=idx%pool.length;
+    for(let mon=monday(start);mon<=end;mon=addDays(mon,7)){
+      const days=[0,1,2,3,4,5,6].map(i=>addDays(mon,i)),isos=days.map(dIso);
+      const naturalOff=x=>{const iso=dIso(x);return !dayOpen(x)||offAllDay(e,x)||(sunProt[e.id]&&sunProt[e.id].has(iso))||(lockedFn(e.id,iso)&&!fixedFn(e.id,iso));};
+      // a rotation day already off in an inherited/manual week moves the sequence forward
+      const lockedPool=pool.filter(pd=>{const iso=dIso(addDays(mon,pd));return lockedFn(e.id,iso)&&!fixedFn(e.id,iso)&&dayOpen(addDays(mon,pd))&&!offAllDay(e,addDays(mon,pd));});
+      if(lockedPool.length)next=(pool.indexOf(lockedPool[lockedPool.length-1])+1)%pool.length;
+      let need=Math.max(0,(7-e.maxDays)-days.filter(naturalOff).length);
+      for(let tries=0;need>0&&tries<pool.length;tries++){
+        const x=addDays(mon,pool[next]),iso=dIso(x);next=(next+1)%pool.length;
+        if(naturalOff(x)||fixedFn(e.id,iso)||iso<dIso(start)||iso>dIso(end))continue;
+        (prot[e.id]=prot[e.id]||new Set()).add(iso);need--;
+      }
+    }
+  });
+  return prot;
+}
 // opts.key: schedule key; opts.locks/opts.assign: manual adjustments to keep (recalculate)
 function generate(start,end,opts){
   opts=opts||{};
@@ -1137,7 +1198,7 @@ function generate(start,end,opts){
   // locks: 'inh' = day inherited from a neighbouring saved schedule, 'set' = manual shift, 'off' = manual day off
   const locks={},key=opts.key;
   for(let d=new Date(start);d<=end;d=addDays(d,1)){
-    const iso=dIso(d),src=otherSchedFor(iso,key);if(!src)continue;
+    const iso=dIso(d),src=otherSchedFor(iso,key,dIso(start));if(!src)continue;
     emps.forEach(e=>{if(!src.empIds.includes(e.id))return;locks[e.id+'|'+iso]='inh';const a=src.assign[e.id]&&src.assign[e.id][iso];if(a)assign[e.id][iso]={s:a.s,e:a.e,partial:!!a.partial};});
   }
   Object.entries(opts.locks||{}).forEach(([k,v])=>{
@@ -1148,7 +1209,9 @@ function generate(start,end,opts){
   });
   const fixedShift=(eid,iso)=>{const l=locks[eid+'|'+iso];return (l==='set'||l==='inh')?(assign[eid][iso]||null):null;};
   const lockedDay=(eid,iso)=>!!locks[eid+'|'+iso];
-  const sunProt=planSundays(start,end,emps,fixedShift,lockedDay),isProt=(emp,iso)=>!!(sunProt[emp.id]&&sunProt[emp.id].has(iso));
+  const sunProt=planSundays(start,end,emps,fixedShift,lockedDay);
+  const weekProt=planWeekOffs(start,end,emps,sunProt,fixedShift,lockedDay,key);
+  const isProt=(emp,iso)=>!!((sunProt[emp.id]&&sunProt[emp.id].has(iso))||(weekProt[emp.id]&&weekProt[emp.id].has(iso)));
   let week={},lastEnd={},weekDays=[];
   emps.forEach(e=>{for(let k=1;k<=2;k++){const x=addDays(start,-k),a=ctxShift(e.id,dIso(x),key);if(a){lastEnd[e.id]=dayNo(x)*1440+a.e;break;}}});
   // intervals of [s,e] where a role is already at its maximum on a given day list
@@ -1277,7 +1340,8 @@ function generate(start,end,opts){
     });
   }
   fillWeek();
-  return {key,start:dIso(start),end:dIso(end),assign,gaps:[],empIds:emps.map(e=>e.id),locks};
+  const offPlan={};Object.entries(weekProt).forEach(([id,set])=>offPlan[id]=[...set]);
+  return {key,start:dIso(start),end:dIso(end),assign,gaps:[],empIds:emps.map(e=>e.id),locks,offPlan};
 }
 
 function renderIssues(){
@@ -1315,6 +1379,11 @@ function verifySchedule(){
       if(a.s<s||a.e>e)add(iso,'warn',t('v.outside',{n:a.emp.name}),a.emp.id);
     });
   }
+  // rotation day off that had to be used (coverage first) or was changed by hand
+  if(state.company.dayOffMode==='rotate')Object.entries(current.offPlan||{}).forEach(([eid,list])=>{
+    const emp=emps.find(e=>e.id===eid);if(!emp)return;
+    list.forEach(iso=>{if(current.assign[eid]?.[iso])add(iso,'warn',t('v.rotation',{n:emp.name,d:D()[dow(parseIso(iso))]+' '+dm(parseIso(iso))}),eid);});
+  });
   // minimum Sundays off per month (only months whose Sundays are all in the schedule)
   const needSun=sundayOffMin();
   if(needSun)monthsInRange(start,end).forEach(({y,m,sundays})=>{
@@ -1430,11 +1499,17 @@ function renderSchedule(){
   for(let d=new Date(start);d<=end;d=addDays(d,1)){if(dow(d)===0&&wk.length){weeks.push(wk);wk=[];}wk.push(new Date(d));}
   if(wk.length)weeks.push(wk);
   const outside=state.employees.filter(e=>!current.empIds.includes(e.id)).sort((a,b)=>a.name.localeCompare(b.name));
+  // later saved schedules that overlap this one and still hold an older version of the shared days
+  const stale=Object.values(state.schedules||{}).filter(x=>x.key!==current.key&&x.start>current.start&&x.start<=current.end).filter(x=>{
+    for(let d=parseIso(x.start);dIso(d)<=current.end&&dIso(d)<=x.end;d=addDays(d,1)){const iso=dIso(d);
+      for(const id of current.empIds){const a=current.assign[id]?.[iso],b=x.assign[id]?.[iso];if(JSON.stringify(a?[a.s,a.e]:null)!==JSON.stringify(b?[b.s,b.e]:null))return true;}}
+    return false;});
   const nMan=manualCount(current),saved=Object.values(state.schedules||{}).sort((a,b)=>b.start.localeCompare(a.start));
   let html=`<div class="card noprint sbar" style="padding:12px 18px">
     <b>${esc(schedLabel(current))}</b> <span class="muted" style="font-size:12px">${dmy(start)} - ${dmy(end)}</span>
     <span class="pill ${current.closed?'ok':'warn'}">${current.closed?t('st.closed',{d:dmy(new Date(current.closedAt))}):t('st.draft')}</span>
     ${nMan?`<span class="pill" title="${t('st.manualTip')}">${t('st.manual',{n:nMan})}</span>`:''}
+    ${stale.map(x=>`<span class="pill bad" title="${t('st.staleTip')}">${t('st.stale',{l:schedLabel(x)})}</span>`).join('')}
     <span class="grow"></span>
     ${saved.length>1?`<select id="savedSel" title="${t('st.saved')}">${saved.map(x=>`<option value="${x.key}" ${x.key===current.key?'selected':''}>${esc(schedLabel(x))}${x.closed?' ✓':''}</option>`).join('')}</select>`:''}
     <button class="btn sm" id="btnRecalc" ${current.closed?'disabled':''} title="${t('st.recalcTip')}">${t('st.recalc')}</button>
@@ -1573,7 +1648,7 @@ let cellCtx=null;
 function openCell(eid,iso){
   if(current.closed){toast(t('st.isClosed'));return;}
   const a=current.assign[eid][iso],d=parseIso(iso),day=state.company.days[dow(d)];
-  const lock=(current.locks||{})[eid+'|'+iso],src=lock==='inh'?otherSchedFor(iso,current.key):null;
+  const lock=(current.locks||{})[eid+'|'+iso],src=lock==='inh'?otherSchedFor(iso,current.key,current.start):null;
   $('#cellLock').textContent=lock==='inh'?t('cell.inh',{s:src?schedLabel(src):''}):lock?t('cell.pinned'):'';
   $('#cUnlock').style.display=lock?'':'none';
   cellCtx={eid,iso};
@@ -1760,11 +1835,11 @@ function textToRest(seg){
 function employeesCsv(list){
   const hdr=t('io.hdr');
   const lines=[hdr.join(';')];
-  list.forEach(e=>lines.push([e.name,e.role||'',e.maxHours,e.maxDays,e.active?t('io.yes'):t('io.no'),e.restrictions.map(restToText).join(' | ')].map(csvCell).join(';')));
+  list.forEach(e=>lines.push([e.name,e.role||'',e.maxHours,e.maxDays,e.active?t('io.yes'):t('io.no'),e.restrictions.map(restToText).join(' | '),(e.offDays||[]).map(i=>D()[i]).join(',')].map(csvCell).join(';')));
   return '﻿'+lines.join('\r\n')+'\r\n';
 }
 const sortedEmps=()=>[...state.employees].sort((a,b)=>a.name.localeCompare(b.name));
-const stripIds=e=>({name:e.name,role:e.role||'',maxHours:e.maxHours,maxDays:e.maxDays,active:e.active,restrictions:e.restrictions.map(({id,...r})=>r)});
+const stripIds=e=>({name:e.name,role:e.role||'',maxHours:e.maxHours,maxDays:e.maxDays,active:e.active,offDays:e.offDays||[],restrictions:e.restrictions.map(({id,...r})=>r)});
 const employeesJson=()=>JSON.stringify({type:'cube4shift.employees',version:1,exportedAt:new Date().toISOString(),employees:sortedEmps().map(stripIds)},null,2);
 $('#empDlCsv').onclick=()=>downloadFile(`cube4shift-employees-${stamp()}.csv`,employeesCsv(sortedEmps()),'text/csv;charset=utf-8');
 $('#empCpCsv').onclick=()=>copyText(employeesCsv(sortedEmps()).replace(/^﻿/,''),$('#empBox'));
@@ -1779,7 +1854,7 @@ $('#empDlTpl').onclick=()=>{
 readInto($('#empFile'),$('#empBox'));
 
 /* --- employees import --- */
-const HDR_ALIASES={name:['name','nome'],role:['role','cargo','funcao'],maxHours:['max_hours_week','max_horas_semana','horas','hours'],maxDays:['max_days_week','max_dias_semana','dias','days'],active:['active','ativo','status'],restrictions:['restrictions','restricoes','restricao']};
+const HDR_ALIASES={offDays:['preferred_days_off','folgas_preferidas','folga_preferida','dias_folga'],name:['name','nome'],role:['role','cargo','funcao'],maxHours:['max_hours_week','max_horas_semana','horas','hours'],maxDays:['max_days_week','max_dias_semana','dias','days'],active:['active','ativo','status'],restrictions:['restrictions','restricoes','restricao']};
 function parseEmployeesText(txt){
   txt=txt.trim();if(!txt)return null;
   const c=state.company;
@@ -1790,14 +1865,14 @@ function parseEmployeesText(txt){
     return {rows:arr.map((e,i)=>{
       const errs=[];if(!String(e.name||'').trim())errs.push(t('io.errNoName'));
       const rs=(Array.isArray(e.restrictions)?e.restrictions:[]).filter(r=>r&&r.kind&&r.type).map(r=>({...r,id:uid()}));
-      return {line:i+1,errs,emp:{name:String(e.name||'').trim(),role:String(e.role||''),maxHours:+e.maxHours||c.defHours,maxDays:Math.min(7,+e.maxDays||c.defDays),active:e.active!==false,restrictions:rs}};
+      return {line:i+1,errs,emp:{offDays:Array.isArray(e.offDays)?e.offDays.filter(d=>d>=0&&d<=6):[],name:String(e.name||'').trim(),role:String(e.role||''),maxHours:+e.maxHours||c.defHours,maxDays:Math.min(7,+e.maxDays||c.defDays),active:e.active!==false,restrictions:rs}};
     })};
   }
   const rows=parseCsv(txt);if(!rows.length)return null;
   const head=rows[0].map(norm);
   const idx={};for(const k in HDR_ALIASES){idx[k]=head.findIndex(h=>HDR_ALIASES[k].includes(h));}
   const hasHeader=idx.name>=0;
-  const pos={name:0,role:1,maxHours:2,maxDays:3,active:4,restrictions:5};
+  const pos={name:0,role:1,maxHours:2,maxDays:3,active:4,restrictions:5,offDays:6};
   for(const k in pos)if(!hasHeader||idx[k]<0)idx[k]=hasHeader?-1:pos[k];
   const body=hasHeader?rows.slice(1):rows;
   return {rows:body.map((r,i)=>{
@@ -1806,7 +1881,9 @@ function parseEmployeesText(txt){
     if(!g('name'))errs.push(t('io.errNoName'));
     g('restrictions').split('|').map(x=>x.trim()).filter(Boolean).forEach(seg=>{const rr=textToRest(seg);if(rr)rs.push(rr);else errs.push(t('io.errSeg',{x:seg}));});
     const act=norm(g('active'));
-    return {line:i+(hasHeader?2:1),errs,emp:{name:g('name'),role:g('role'),maxHours:+g('maxHours').replace(',','.')||c.defHours,maxDays:Math.min(7,+g('maxDays')||c.defDays),active:!['no','nao','n','0','false','inativo','inactive'].includes(act),restrictions:rs}};
+    const odRaw=g('offDays'),offDays=[...new Set(odRaw.split(/[,\s/]+/).filter(Boolean).map(d=>DAY_KEYS[norm(d).slice(0,3)]))];
+    if(offDays.some(d=>d===undefined))errs.push(t('io.errOff',{x:odRaw}));
+    return {line:i+(hasHeader?2:1),errs,emp:{name:g('name'),role:g('role'),maxHours:+g('maxHours').replace(',','.')||c.defHours,maxDays:Math.min(7,+g('maxDays')||c.defDays),offDays:offDays.filter(d=>d!==undefined).sort(),active:!['no','nao','n','0','false','inativo','inactive'].includes(act),restrictions:rs}};
   })};
 }
 let pendingImport=null;
