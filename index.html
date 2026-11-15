@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Cube4Shift</title>
+<script>try{const t=localStorage.getItem("cube4shift.theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
 <style>
@@ -14,9 +15,15 @@
   --radius:10px;
 }
 @media (prefers-color-scheme: dark){
-  :root{--bg:#12151b;--panel:#1a1e26;--ink:#e8ebf1;--muted:#98a2b3;--line:#2b313c;
+  :root:not([data-theme=light]){--bg:#12151b;--panel:#1a1e26;--ink:#e8ebf1;--muted:#98a2b3;--line:#2b313c;
   --accent:#6f8fff;--accent-soft:#232c48;--ok:#4cc79a;--ok-soft:#163328;--warn:#f5a25d;--warn-soft:#3a2a18;--bad:#f2766d;--bad-soft:#3b1d1b;}
 }
+:root[data-theme=dark]{--bg:#12151b;--panel:#1a1e26;--ink:#e8ebf1;--muted:#98a2b3;--line:#2b313c;
+  --accent:#6f8fff;--accent-soft:#232c48;--ok:#4cc79a;--ok-soft:#163328;--warn:#f5a25d;--warn-soft:#3a2a18;--bad:#f2766d;--bad-soft:#3b1d1b;}
+:root{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
+@media (prefers-color-scheme: dark){:root:not([data-theme=light]){color-scheme:dark}}
+.theme-btn{border:1px solid var(--line);background:var(--panel);color:var(--ink);border-radius:8px;width:36px;height:36px;cursor:pointer;display:grid;place-items:center;font-size:16px}
+.theme-btn:hover{border-color:var(--accent)}
 *{box-sizing:border-box}
 body{margin:0;font-family:Inter,system-ui,sans-serif;background:var(--bg);color:var(--ink);font-size:14px;line-height:1.45}
 header{display:flex;align-items:center;gap:16px;padding:14px 24px;background:var(--panel);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:5;flex-wrap:wrap}
@@ -107,6 +114,7 @@ textarea{width:100%;min-height:160px;font-family:'JetBrains Mono',monospace;font
     <button data-view="empresa">Empresa</button>
     <button data-view="dados">Dados</button>
   </nav>
+  <button class="theme-btn" id="themeBtn" title="Alternar tema claro/escuro"></button>
 </header>
 
 <main>
@@ -650,6 +658,11 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')document.querySelect
 
 function renderAll(){renderCompany();renderEmployees();}
 load();renderAll();
+function isDark(){const t=document.documentElement.dataset.theme;return t?t==='dark':!!(window.matchMedia&&matchMedia('(prefers-color-scheme: dark)').matches);}
+function paintThemeBtn(){const d=isDark();$('#themeBtn').textContent=d?'☀':'☾';$('#themeBtn').title=d?'Mudar para tema claro':'Mudar para tema escuro';}
+$('#themeBtn').onclick=()=>{const t=isDark()?'light':'dark';document.documentElement.dataset.theme=t;try{localStorage.setItem('cube4shift.theme',t);}catch(e){}paintThemeBtn();};
+try{matchMedia('(prefers-color-scheme: dark)').addEventListener('change',paintThemeBtn);}catch(e){}
+paintThemeBtn();
 $('#viewMode').value=state.viewMode||'detail';
 if(state.schedule){current=state.schedule;current.empIds=current.empIds.filter(id=>state.employees.some(e=>e.id===id));renderSchedule();}
 </script>

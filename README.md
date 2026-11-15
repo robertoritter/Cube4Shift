@@ -11,6 +11,7 @@ Aplicação web para montar escalas de trabalho semanais e mensais.
 - **Escala:** geração automática semanal ou mensal, equilibrando horas entre as pessoas e respeitando restrições, limites e descanso. Lacunas de cobertura são listadas.
 - **Ajuste manual:** trocar a pessoa de um turno (com troca automática se a outra já tiver turno no dia), mudar horário, escalar alguém na folga, adicionar ou tirar pessoas da escala. Conflitos geram aviso.
 - **Visualizações:** detalhada (pessoa por dia) e simplificada (Manhã, Intermediário, Tarde e Folga por semana, no formato da planilha impressa).
+- **Tema:** botão no topo para alternar entre claro e escuro (a escolha fica salva; sem escolha, segue o sistema).
 - **Dados:** salvos no navegador (localStorage), com backup e importação em JSON e cópia da escala em CSV.
 
 ## Como usar
