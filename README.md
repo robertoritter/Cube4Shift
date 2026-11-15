@@ -14,7 +14,10 @@ A web app for building weekly and monthly work schedules.
 - **Employees (CRUD):** name, role, weekly hour and day limits, active/inactive status.
   - Recurring restrictions (every week): unavailable all day, not after, not before, unavailable between two times.
   - One-off constraints (a date or a period): day off, appointment, course etc.
-- **Schedule:** automatic weekly or monthly generation that balances hours across people and respects restrictions, limits and rest. Coverage gaps are listed.
+- **Restriction types per person:** unavailable all day, not after, not before, unavailable between, **can only work between** (e.g. nights only), and **alternating days** (e.g. works Saturday one week and Sunday the next). Recurring or one-off.
+- **Rules by role:** minimum and maximum people of each role at the same time (e.g. at least 1 cashier, at most 1 supervisor). The generator respects them, trimming a shift when needed to stay under the maximum.
+- **Schedule:** automatic weekly or monthly generation that balances hours across people and respects restrictions, role rules, limits and rest.
+- **Schedule check:** coverage, role minimum/maximum, restrictions, weekly limits and rest are verified continuously, including after manual changes. Conflicts are allowed but flagged on screen (cell outline, day marker and a summary panel) and never printed.
 - **Manual adjustments:** change the person on a shift (swapping automatically if the other person already works that day), change times, schedule someone on a day off, add or remove people from the schedule. Conflicts raise a warning.
 - **Views:**
   - Detailed: person by day, with hours and coverage.
@@ -51,7 +54,10 @@ Aplicação web para montar escalas de trabalho semanais e mensais.
 - **Funcionários (CRUD):** nome, cargo, limite de horas e dias por semana, situação ativo/inativo.
   - Restrições fixas (toda semana): dia todo, não depois de, não antes de, intervalo.
   - Entraves pontuais (data ou período): folga, consulta, curso etc.
-- **Escala:** geração automática semanal ou mensal, equilibrando horas entre as pessoas e respeitando restrições, limites e descanso. Lacunas de cobertura são listadas.
+- **Tipos de restrição por pessoa:** indisponível o dia todo, não depois de, não antes de, indisponível no intervalo, **só pode trabalhar entre** (ex.: só à noite) e **dias alternados** (ex.: sábado numa semana, domingo na outra). Fixas ou pontuais.
+- **Regras por cargo:** mínimo e máximo de pessoas de cada cargo ao mesmo tempo (ex.: pelo menos 1 caixa, no máximo 1 supervisor). A geração respeita, encurtando um turno quando preciso para não passar do máximo.
+- **Escala:** geração automática semanal ou mensal, equilibrando horas entre as pessoas e respeitando restrições, regras por cargo, limites e descanso.
+- **Verificação da escala:** cobertura, mínimo e máximo por cargo, restrições, limites semanais e descanso são verificados o tempo todo, inclusive após ajustes manuais. Conflitos são permitidos, mas sinalizados na tela (borda na célula, marcador no dia e painel de resumo) e nunca saem na impressão.
 - **Ajuste manual:** trocar a pessoa de um turno (com troca automática se a outra já tiver turno no dia), mudar horário, escalar alguém na folga, adicionar ou tirar pessoas da escala. Conflitos geram aviso.
 - **Visualizações:**
   - Detalhada: pessoa por dia, com horas e cobertura.

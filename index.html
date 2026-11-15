@@ -58,7 +58,8 @@ table{border-collapse:collapse;width:100%}
 th,td{padding:8px 10px;border-bottom:1px solid var(--line);text-align:left;vertical-align:middle}
 th{font-size:12px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);font-weight:600}
 input,select,textarea{font:inherit;color:var(--ink);background:var(--panel);border:1px solid var(--line);border-radius:7px;padding:7px 9px}
-input[type=time]{width:110px}input[type=number]{width:80px}
+input.tm{width:78px;font-variant-numeric:tabular-nums;text-align:center}
+input.tm.bad{border-color:var(--bad);outline:2px solid var(--bad-soft)}input[type=number]{width:80px}
 input:focus,select:focus,textarea:focus{outline:2px solid var(--accent-soft);border-color:var(--accent)}
 .btn{border:1px solid var(--line);background:var(--panel);color:var(--ink);border-radius:8px;padding:8px 14px;font:inherit;font-weight:500;cursor:pointer}
 .btn:hover{border-color:var(--accent)}
@@ -143,6 +144,17 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--accent-soft);bor
 .stat span{color:var(--muted);font-size:12px}
 textarea{width:100%;min-height:160px;font-family:'JetBrains Mono',monospace;font-size:12px}
 .search{min-width:220px}
+/* conflict flags: on screen only */
+.flag-bad{box-shadow:inset 0 0 0 2px var(--bad)!important}
+.flag-warn{box-shadow:inset 0 0 0 2px var(--warn)!important}
+.sched td.flag-bad::after,.sched td.flag-warn::after,.bcard.flag-bad::after,.bcard.flag-warn::after{content:"!";font:700 10px Inter,sans-serif;color:#fff;background:var(--bad);border-radius:50%;width:14px;height:14px;display:inline-grid;place-items:center;margin-left:4px;vertical-align:middle}
+.sched td.flag-warn::after,.bcard.flag-warn::after{background:var(--warn)}
+.bcard{position:relative}.bcard.flag-bad::after,.bcard.flag-warn::after{position:absolute;top:4px;right:4px;margin:0}
+.dflag{display:inline-grid;place-items:center;width:14px;height:14px;border-radius:50%;font:700 10px Inter,sans-serif;color:#fff;background:var(--warn);margin-left:4px;cursor:help;vertical-align:middle;text-transform:none}
+.dflag.bad{background:var(--bad)}
+.vbox.ok{padding:12px 18px;border-color:var(--ok)}
+body.printing .flag-bad,body.printing .flag-warn{box-shadow:none!important}
+body.printing .flag-bad::after,body.printing .flag-warn::after,body.printing .dflag{display:none!important}
 #printFoot{display:none}
 /* print layout: applied by the body.printing class (measured on screen, then printed) */
 body.printing>header,body.printing .noprint,body.printing .view:not(#v-escala),
@@ -266,6 +278,13 @@ body.printing #printFoot{display:flex;justify-content:flex-end;margin-top:2px}
     <table id="compTable"></table>
   </div>
   <div class="card">
+    <h3 data-i18n="co.roleRules"></h3>
+    <p class="muted" style="margin-top:-6px" data-i18n="co.roleSub"></p>
+    <table id="roleTable"></table>
+    <datalist id="roleList"></datalist>
+    <div class="row" style="margin-top:10px"><button class="btn sm" id="btnAddRole" data-i18n="co.addRole"></button></div>
+  </div>
+  <div class="card">
     <h3 data-i18n="co.rules"></h3>
     <div class="grid2">
       <div class="field"><label data-i18n="co.shiftHours"></label><input type="number" id="shiftHours" min="2" max="12" step="0.5"></div>
@@ -352,6 +371,7 @@ body.printing #printFoot{display:flex;justify-content:flex-end;margin-top:2px}
     <div id="restList"></div>
     <div class="row" style="margin:6px 0 18px">
       <button class="btn sm" id="btnAddRec" data-i18n="emp.addRec"></button>
+      <button class="btn sm" id="btnAddAlt" data-i18n="emp.addAlt"></button>
       <button class="btn sm" id="btnAddOne" data-i18n="emp.addOne"></button>
     </div>
     <div class="row" style="justify-content:flex-end">
@@ -375,8 +395,8 @@ body.printing #printFoot{display:flex;justify-content:flex-end;margin-top:2px}
     <h3 id="cellTitle"></h3>
     <div class="field" style="margin-bottom:10px"><label data-i18n="cell.person"></label><select id="cPerson"></select></div>
     <div class="row">
-      <div class="field"><label data-i18n="cell.start"></label><input type="time" id="cStart"></div>
-      <div class="field"><label data-i18n="cell.end"></label><input type="time" id="cEnd"></div>
+      <div class="field"><label data-i18n="cell.start"></label><input type="text" class="tm" inputmode="numeric" maxlength="5" placeholder="HH:MM" autocomplete="off" id="cStart"></div>
+      <div class="field"><label data-i18n="cell.end"></label><input type="text" class="tm" inputmode="numeric" maxlength="5" placeholder="HH:MM" autocomplete="off" id="cEnd"></div>
     </div>
     <p class="muted" id="cellWarn"></p>
     <div class="row" style="justify-content:flex-end;margin-top:10px">
@@ -408,12 +428,18 @@ en:{
   'sch.hint':'Click a shift to change the person or the time. Click a day off to schedule someone.',
   'sch.weekOf':'Week of {a} to {b}','sch.employee':'Employee','sch.hours':'Hours','sch.closed':'closed','sch.unavail':'unav.','sch.unavailTitle':'Unavailable','sch.off':'off',
   'sch.coverage':'Minimum coverage','sch.removeFromSchedule':'Remove from schedule',
-  'sch.legend':['Full shift','Partial shift (due to restriction)','Unavailable all day','Coverage met','Short-staffed'],
+  'sch.legend':['Full shift','Partial shift (restriction or role limit)','Unavailable all day','Coverage met','Short-staffed'],
   'sch.clickCell':'Click any cell to adjust or remove a shift manually.',
   'sch.simpleNote':'Morning is the shift that starts at opening, Afternoon runs until closing and Midday sits in the middle of the day. Orange names are partial shifts. Click a name to change the person or the time. Hover to see the exact hours.',
   'sch.gapsTitle':'Coverage gaps (automatic generation)',
   'sch.gapsHelp':'To fix: add more people, raise weekly limits, lower minimum coverage or review the restrictions.',
   'st.people':'people in the schedule','st.shifts':'shifts','st.hours':'hours allocated','st.cov':'days with full coverage',
+  'tm.invalid':'Invalid time. Use HH:MM, from 00:00 to 23:59',
+  'v.title':'Schedule check','v.sub':'Conflicts are allowed (for example after manual changes) and are flagged here and on the schedule; they are never printed.','v.nBad':'{n} conflicts','v.nWarn':'{n} warnings',
+  'v.okTitle':'No conflicts','v.okSub':'Coverage, role rules, restrictions, weekly limits and rest are all respected.',
+  'v.coverage':'{a}-{b}: {n} of {m} people','v.roleMin':'{r} {a}-{b}: {n} of minimum {m}','v.roleMax':'{r} {a}-{b}: {n}, maximum {m}',
+  'v.restriction':'{n} works during a restriction ({r})','v.outside':'{n} outside opening hours','v.closedDay':'{n} scheduled on a closed day',
+  'v.rest':'{n}: only {h} h rest (minimum {m} h)','v.hours':'{n}: {h} h in week of {w} (max {m})','v.days':'{n}: {d} days in week of {w} (max {m})',
   'pr.paper':'Paper','pr.orient':'Orientation','pr.landscape':'Landscape','pr.portrait':'Portrait','pr.print':'Print','pr.scale':'Scale','pr.fit':'Fit to one page','pr.normal':'Normal (more pages)',
   'pr.title':'Work schedule','pr.generated':'Printed on {d}','pr.fileReady':'Printable file saved: open it and it prints automatically',
   'board.off':'Off','board.note':'Each person keeps the same color across the schedule. Click a card or an off-day avatar to change the person or the time.','board.today':'Today',
@@ -431,11 +457,15 @@ en:{
   'emp.noRestModal':'No restrictions. This person can work any time the company is open.',
   'rest.recurring':'Recurring (every week)','rest.oneoff':'One-off','rest.remove':'Remove','rest.from':'From','rest.to':'To',
   'rest.off':'Unavailable all day','rest.after':'Cannot work after','rest.before':'Cannot work before','rest.between':'Unavailable between','rest.and':'and',
-  'rest.note':'Reason (optional)',
+  'rest.note':'Reason (optional)','rest.only':'Can only work between','rest.alt':'Alternating weekly',
+  'rest.altStart':'Week when they work on {d}','rest.altHelp':'In the chosen week they work {a} and are off {b}; the next week it flips, and so on.',
+  'rl.only':'only {a} to {b}','rl.alt':'alternating weekly, {d} in week of {w}','emp.addAlt':'+ Alternating days',
   'rl.allDays':'Every day','rl.range':'{a} to {b}','rl.off':'unavailable all day','rl.after':'not after {t}','rl.before':'not before {t}','rl.between':'unavailable {a} to {b}',
   'emp.needName':'Please enter the name','emp.needRest':'Complete the days/dates and times of the restrictions','emp.saved':'Employee saved',
   'co.title':'Company settings','co.sub':'Opening hours for each weekday and how many people must be working at the same time.',
   'co.hours':'Opening hours','co.colDay':'Day','co.colOpen':'Open?','co.colStart':'Start','co.colEnd':'End','co.colStaff':'People at the same time','co.colSpan':'Hours open','co.closed':'Closed',
+  'co.roleRules':'Rules by role','co.roleSub':'How many people of each role must (minimum) or may (maximum) be working at the same time while the company is open. The generator respects these rules; manual changes are allowed and flagged.',
+  'co.addRole':'+ Role rule','co.noRoleRules':'No rules by role. Only the total of people at the same time is used.','co.colRole':'Role','co.colMin':'Minimum at the same time','co.colMax':'Maximum at the same time','co.colPeople':'Active people','co.rolePh':'e.g. Cashier','co.noLimit':'no limit','co.peopleN':'{n} active',
   'co.rules':'Working-time rules','co.shiftHours':'Shift length (hours)','co.minPartial':'Minimum partial shift (hours)','co.minRest':'Minimum rest between shifts (hours)',
   'co.defHours':'Default: max hours/week','co.defDays':'Default: max days/week',
   'co.partialNote':'When nobody can cover a full shift, the system tries to fit a partial shift inside someone\'s availability (as long as it reaches the minimum partial length). Whatever is left shows up as a gap.',
@@ -459,7 +489,7 @@ en:{
   'io.fmtHtml':'<p>One row per employee. Separator <code>;</code> or <code>,</code> (detected automatically). Columns: <code>name;role;max_hours_week;max_days_week;active;restrictions</code>. Active accepts yes/no, sim/não, 1/0.</p><p>Restrictions go in a single column, separated by <code>|</code>. Each item is <i>days</i> + <i>rule</i> + optional <i>(reason)</i>:</p><ul><li><code>Mon,Wed,Fri after 15:00 (College)</code></li><li><code>Sun off</code></li><li><code>all before 10:00</code></li><li><code>Tue between 12:00-14:00</code></li><li><code>2026-12-24..2026-12-26 off (Holidays)</code> one-off period</li></ul><p>Days accept English or Portuguese (Mon/Seg, Tue/Ter...). Rules: off, after, before, between (or indisponível, depois, antes, entre).</p>',
   'io.tplNote':'Course',
   'io.hdr':['name','role','max_hours_week','max_days_week','active','restrictions'],'io.yes':'yes','io.no':'no','io.all':'all',
-  'io.kw':{off:'off',after:'after',before:'before',between:'between'},
+  'io.kw':{off:'off',after:'after',before:'before',between:'between',only:'only',alt:'alternate'},
   'data.backup':'Full backup','data.export':'Show JSON','data.copy':'Copy','data.import':'Import pasted JSON','data.reset':'Restore sample data',
   'data.ph':'Paste a backup here to import',
   'data.generated':'JSON generated','data.copied':'Copied','data.selectCopy':'Select and copy manually','data.invalid':'Invalid JSON',
@@ -494,12 +524,18 @@ pt:{
   'sch.hint':'Clique num turno para trocar a pessoa ou o horário. Clique numa folga para escalar alguém.',
   'sch.weekOf':'Semana de {a} a {b}','sch.employee':'Funcionário','sch.hours':'Horas','sch.closed':'fechado','sch.unavail':'indisp.','sch.unavailTitle':'Indisponível','sch.off':'folga',
   'sch.coverage':'Cobertura mínima','sch.removeFromSchedule':'Tirar da escala',
-  'sch.legend':['Turno completo','Turno parcial (por restrição)','Indisponível o dia todo','Cobertura atendida','Falta gente'],
+  'sch.legend':['Turno completo','Turno parcial (restrição ou limite do cargo)','Indisponível o dia todo','Cobertura atendida','Falta gente'],
   'sch.clickCell':'Clique em qualquer célula para ajustar ou remover um turno manualmente.',
   'sch.simpleNote':'Manhã é o turno que começa na abertura, Tarde é o que vai até o fechamento e Intermediário é o que fica no meio do dia. Nomes em laranja são turnos parciais. Clique em um nome para trocar a pessoa ou o horário. Passe o mouse para ver o horário exato.',
   'sch.gapsTitle':'Lacunas de cobertura (geração automática)',
   'sch.gapsHelp':'Para resolver: cadastre mais pessoas, aumente limites semanais, reduza a cobertura mínima ou revise as restrições.',
   'st.people':'pessoas na escala','st.shifts':'turnos','st.hours':'horas alocadas','st.cov':'dias com cobertura completa',
+  'tm.invalid':'Horário inválido. Use HH:MM, de 00:00 a 23:59',
+  'v.title':'Verificação da escala','v.sub':'Conflitos são permitidos (por exemplo após ajustes manuais) e ficam sinalizados aqui e na escala; nunca saem na impressão.','v.nBad':'{n} conflitos','v.nWarn':'{n} avisos',
+  'v.okTitle':'Nenhum conflito','v.okSub':'Cobertura, regras por cargo, restrições, limites semanais e descanso estão respeitados.',
+  'v.coverage':'{a}-{b}: {n} de {m} pessoas','v.roleMin':'{r} {a}-{b}: {n} do mínimo {m}','v.roleMax':'{r} {a}-{b}: {n}, máximo {m}',
+  'v.restriction':'{n} trabalha durante restrição ({r})','v.outside':'{n} fora do horário de funcionamento','v.closedDay':'{n} escalado(a) em dia fechado',
+  'v.rest':'{n}: só {h} h de descanso (mínimo {m} h)','v.hours':'{n}: {h} h na semana de {w} (máx. {m})','v.days':'{n}: {d} dias na semana de {w} (máx. {m})',
   'pr.paper':'Papel','pr.orient':'Orientação','pr.landscape':'Paisagem','pr.portrait':'Retrato','pr.print':'Imprimir','pr.scale':'Escala','pr.fit':'Caber em uma página','pr.normal':'Normal (mais páginas)',
   'pr.title':'Escala de trabalho','pr.generated':'Impresso em {d}','pr.fileReady':'Arquivo para impressão salvo: abra e ele imprime automaticamente',
   'board.off':'Folga','board.note':'Cada pessoa mantém a mesma cor em toda a escala. Clique num cartão ou num avatar da folga para trocar a pessoa ou o horário.','board.today':'Hoje',
@@ -517,11 +553,15 @@ pt:{
   'emp.noRestModal':'Nenhuma restrição. A pessoa pode trabalhar em qualquer horário de funcionamento.',
   'rest.recurring':'Fixa (toda semana)','rest.oneoff':'Pontual','rest.remove':'Remover','rest.from':'De','rest.to':'Até',
   'rest.off':'Indisponível o dia todo','rest.after':'Não pode trabalhar depois de','rest.before':'Não pode trabalhar antes de','rest.between':'Indisponível no intervalo','rest.and':'às',
-  'rest.note':'Motivo (opcional)',
+  'rest.note':'Motivo (opcional)','rest.only':'Só pode trabalhar entre','rest.alt':'Alternância semanal',
+  'rest.altStart':'Semana em que trabalha no(a) {d}','rest.altHelp':'Na semana escolhida trabalha {a} e folga {b}; na semana seguinte inverte, e assim por diante.',
+  'rl.only':'somente {a} às {b}','rl.alt':'alterna semanalmente, {d} na semana de {w}','emp.addAlt':'+ Dias alternados',
   'rl.allDays':'Todos os dias','rl.range':'{a} a {b}','rl.off':'indisponível o dia todo','rl.after':'não depois de {t}','rl.before':'não antes de {t}','rl.between':'indisponível {a} às {b}',
   'emp.needName':'Informe o nome','emp.needRest':'Complete os dias/datas e horários das restrições','emp.saved':'Funcionário salvo',
   'co.title':'Configuração da empresa','co.sub':'Horário de funcionamento por dia da semana e quantas pessoas precisam estar trabalhando ao mesmo tempo.',
   'co.hours':'Funcionamento','co.colDay':'Dia','co.colOpen':'Abre?','co.colStart':'Início','co.colEnd':'Fim','co.colStaff':'Pessoas ao mesmo tempo','co.colSpan':'Horas abertas','co.closed':'Fechado',
+  'co.roleRules':'Regras por cargo','co.roleSub':'Quantas pessoas de cada cargo precisam (mínimo) ou podem (máximo) estar trabalhando ao mesmo tempo enquanto a empresa está aberta. A geração respeita essas regras; ajustes manuais são permitidos e sinalizados.',
+  'co.addRole':'+ Regra por cargo','co.noRoleRules':'Nenhuma regra por cargo. Só o total de pessoas ao mesmo tempo é usado.','co.colRole':'Cargo','co.colMin':'Mínimo ao mesmo tempo','co.colMax':'Máximo ao mesmo tempo','co.colPeople':'Pessoas ativas','co.rolePh':'ex.: Caixa','co.noLimit':'sem limite','co.peopleN':'{n} ativas',
   'co.rules':'Regras de jornada','co.shiftHours':'Duração do turno (horas)','co.minPartial':'Turno mínimo parcial (horas)','co.minRest':'Descanso mínimo entre jornadas (horas)',
   'co.defHours':'Padrão: máx. horas/semana','co.defDays':'Padrão: máx. dias/semana',
   'co.partialNote':'Quando ninguém pode cobrir um turno inteiro, o sistema tenta encaixar um turno parcial dentro da disponibilidade da pessoa (desde que tenha pelo menos o mínimo parcial). O trecho que sobrar aparece como lacuna.',
@@ -545,7 +585,7 @@ pt:{
   'io.fmtHtml':'<p>Uma linha por funcionário. Separador <code>;</code> ou <code>,</code> (detectado automaticamente). Colunas: <code>nome;cargo;max_horas_semana;max_dias_semana;ativo;restricoes</code>. Ativo aceita sim/não, yes/no, 1/0.</p><p>As restrições ficam numa coluna só, separadas por <code>|</code>. Cada item é <i>dias</i> + <i>regra</i> + <i>(motivo)</i> opcional:</p><ul><li><code>Seg,Qua,Sex depois 15:00 (Faculdade)</code></li><li><code>Dom indisponível</code></li><li><code>todos antes 10:00</code></li><li><code>Ter entre 12:00-14:00</code></li><li><code>2026-12-24..2026-12-26 indisponível (Festas)</code> período pontual</li></ul><p>Dias aceitam português ou inglês (Seg/Mon, Ter/Tue...). Regras: indisponível, depois, antes, entre (ou off, after, before, between).</p>',
   'io.tplNote':'Curso',
   'io.hdr':['nome','cargo','max_horas_semana','max_dias_semana','ativo','restricoes'],'io.yes':'sim','io.no':'não','io.all':'todos',
-  'io.kw':{off:'indisponível',after:'depois',before:'antes',between:'entre'},
+  'io.kw':{off:'indisponível',after:'depois',before:'antes',between:'entre',only:'somente',alt:'alterna'},
   'data.backup':'Backup completo','data.export':'Mostrar JSON','data.copy':'Copiar','data.import':'Importar JSON colado','data.reset':'Restaurar dados de exemplo',
   'data.ph':'Cole aqui um backup para importar',
   'data.generated':'JSON gerado','data.copied':'Copiado','data.selectCopy':'Selecione e copie manualmente','data.invalid':'JSON inválido',
@@ -594,7 +634,8 @@ function seed(){
         {id:uid(),kind:'rec',days:[5,6],type:'off',time:'',note:n[3]}]},
       {id:uid(),name:'Elisa Ramos',role:r[2],maxHours:44,maxDays:6,active:true,restrictions:[
         {id:uid(),kind:'rec',days:[3],type:'after',time:'18:00',note:''}]},
-      {id:uid(),name:'Fábio Torres',role:r[0],maxHours:44,maxDays:6,active:true,restrictions:[]},
+      {id:uid(),name:'Fábio Torres',role:r[0],maxHours:44,maxDays:6,active:true,restrictions:[
+        {id:uid(),kind:'alt',days:[5,6],start:dIso(monday(new Date())),type:'off',note:''}]},
       {id:uid(),name:'Gabriela Nunes',role:r[0],maxHours:30,maxDays:5,active:true,restrictions:[
         {id:uid(),kind:'rec',days:[0,1,2,3,4,5,6],type:'before',time:'10:00',note:n[4]}]},
       {id:uid(),name:'Henrique Alves',role:r[3],maxHours:44,maxDays:6,active:true,restrictions:[]}
@@ -618,6 +659,38 @@ const p2=n=>String(n).padStart(2,'0');
 const dm=d=>lang==='en'?p2(d.getMonth()+1)+'/'+p2(d.getDate()):p2(d.getDate())+'/'+p2(d.getMonth()+1);
 const dmy=d=>dm(d)+'/'+String(d.getFullYear()).slice(2);
 
+/* ---------- time fields (HH:MM text mask) ----------
+   Native time inputs drop digits when the user types slowly, so times use a
+   text field: type at any pace (2130, 21:30, 930, 9, 21h30), normalized on change. */
+function normTime(v){
+  v=String(v||'').trim();if(!v)return '';
+  let h,m;
+  const mm=v.match(/^(\d{1,2})\s*[:h.]\s*(\d{0,2})$/i);
+  if(mm){h=+mm[1];m=mm[2]===''?0:+(mm[2].length===1?mm[2]+'0':mm[2]);}
+  else{const d=v.replace(/\D/g,'');
+    if(d.length<=2){h=+d;m=0;}else if(d.length===3){h=+d[0];m=+d.slice(1);}else{h=+d.slice(0,2);m=+d.slice(2,4);}}
+  if(isNaN(h)||isNaN(m)||h>23||m>59)return null;
+  return p2(h)+':'+p2(m);
+}
+// select the whole value on focus; the first mouseup would otherwise move the caret and drop the selection
+document.addEventListener('focusin',e=>{const el=e.target;if(el.classList&&el.classList.contains('tm')){el.dataset.prev=el.value;el.dataset.fresh='1';try{el.select();}catch(x){}}});
+document.addEventListener('mouseup',e=>{const el=e.target;if(el.classList&&el.classList.contains('tm')&&el.dataset.fresh==='1'){el.dataset.fresh='';if(el.selectionStart===el.selectionEnd)e.preventDefault(),el.select();}});
+document.addEventListener('keydown',e=>{if(e.target.classList&&e.target.classList.contains('tm'))e.target.dataset.fresh='';},true);
+document.addEventListener('input',e=>{
+  const el=e.target;if(!el.classList||!el.classList.contains('tm'))return;
+  el.classList.remove('bad');
+  const clean=el.value.replace(/[^\d:hH.]/g,'');if(clean!==el.value)el.value=clean;
+});
+// capture phase: normalize before the field's own change handler reads the value
+document.addEventListener('change',e=>{
+  const el=e.target;if(!el.classList||!el.classList.contains('tm'))return;
+  const v=normTime(el.value);
+  if(v===''){el.value=el.dataset.prev||'';e.stopImmediatePropagation();return;}
+  if(v===null){el.classList.add('bad');el.value=el.dataset.prev||'';toast(t('tm.invalid'));e.stopImmediatePropagation();return;}
+  el.value=v;el.dataset.prev=v;
+},true);
+document.addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target.classList&&e.target.classList.contains('tm'))e.target.blur();});
+
 /* ---------- navigation ---------- */
 document.querySelectorAll('#nav button').forEach(b=>b.onclick=()=>{
   document.querySelectorAll('#nav button').forEach(x=>x.classList.toggle('active',x===b));
@@ -632,25 +705,60 @@ function renderCompany(){
     let span=toMin(d.end)-toMin(d.start);if(span<=0)span+=1440;
     h+=`<tr><td><b>${DF()[i]}</b></td>
     <td><input type="checkbox" data-i="${i}" data-k="open" ${d.open?'checked':''}></td>
-    <td><input type="time" data-i="${i}" data-k="start" value="${d.start}" ${d.open?'':'disabled'}></td>
-    <td><input type="time" data-i="${i}" data-k="end" value="${d.end}" ${d.open?'':'disabled'}></td>
+    <td><input type="text" class="tm" inputmode="numeric" maxlength="5" placeholder="HH:MM" autocomplete="off" data-i="${i}" data-k="start" value="${d.start}" ${d.open?'':'disabled'}></td>
+    <td><input type="text" class="tm" inputmode="numeric" maxlength="5" placeholder="HH:MM" autocomplete="off" data-i="${i}" data-k="end" value="${d.end}" ${d.open?'':'disabled'}></td>
     <td><input type="number" min="1" max="50" data-i="${i}" data-k="minStaff" value="${d.minStaff}" ${d.open?'':'disabled'}></td>
-    <td class="muted">${d.open?(span/60).toFixed(1).replace('.0','')+' h':t('co.closed')}</td></tr>`;
+    <td class="muted" id="span${i}">${d.open?(span/60).toFixed(1).replace('.0','')+' h':t('co.closed')}</td></tr>`;
   });
   $('#compTable').innerHTML=h;
+  // update state in place: re-rendering while the user is still typing a time resets the field
   $('#compTable').querySelectorAll('input').forEach(inp=>inp.onchange=()=>{
-    const d=c.days[inp.dataset.i],k=inp.dataset.k;
-    d[k]=k==='open'?inp.checked:k==='minStaff'?Math.max(1,+inp.value||1):inp.value;
-    save();renderCompany();
+    const i=+inp.dataset.i,d=c.days[i],k=inp.dataset.k;
+    if(k==='open'){d.open=inp.checked;save();renderCompany();return;}
+    if(k==='minStaff'){d.minStaff=Math.max(1,+inp.value||1);}
+    else{if(!inp.value)return;d[k]=inp.value;}
+    save();
+    let span=toMin(d.end)-toMin(d.start);if(span<=0)span+=1440;
+    $('#span'+i).textContent=(span/60).toFixed(1).replace('.0','')+' h';
   });
+  $('#compTable').querySelectorAll('input[data-k=minStaff]').forEach(inp=>inp.onblur=()=>{inp.value=c.days[inp.dataset.i].minStaff;});
+  renderRoleRules();
   ['shiftHours','minPartial','minRest','defHours','defDays'].forEach(k=>{const el=$('#'+k);el.value=c[k];el.onchange=()=>{c[k]=+el.value;save();};});
 }
 
+function renderRoleRules(){
+  const c=state.company;c.roleRules=c.roleRules||[];
+  const roles=[...new Set(state.employees.map(e=>(e.role||'').trim()).filter(Boolean))].sort();
+  $('#roleList').innerHTML=roles.map(r=>`<option value="${esc(r)}">`).join('');
+  if(!c.roleRules.length){$('#roleTable').innerHTML=`<tr><td class="muted">${t('co.noRoleRules')}</td></tr>`;return;}
+  let h=`<tr><th>${t('co.colRole')}</th><th>${t('co.colMin')}</th><th>${t('co.colMax')}</th><th>${t('co.colPeople')}</th><th></th></tr>`;
+  c.roleRules.forEach(r=>{
+    const n=state.employees.filter(e=>e.active&&norm(e.role)===norm(r.role)).length;
+    h+=`<tr><td><input list="roleList" data-rr="${r.id}" data-k="role" value="${esc(r.role)}" placeholder="${t('co.rolePh')}" style="min-width:180px"></td>
+      <td><input type="number" min="0" max="50" data-rr="${r.id}" data-k="min" value="${r.min??0}"></td>
+      <td><input type="number" min="1" max="50" data-rr="${r.id}" data-k="max" value="${r.max??''}" placeholder="${t('co.noLimit')}"></td>
+      <td class="muted">${r.role?t('co.peopleN',{n}):''}</td>
+      <td><button class="btn sm danger" data-rrdel="${r.id}">${t('rest.remove')}</button></td></tr>`;
+  });
+  $('#roleTable').innerHTML=h;
+  $('#roleTable').querySelectorAll('[data-rr]').forEach(inp=>inp.onchange=()=>{
+    const r=c.roleRules.find(x=>x.id===inp.dataset.rr),k=inp.dataset.k;
+    if(k==='role')r.role=inp.value.trim();
+    else if(k==='min')r.min=Math.max(0,+inp.value||0);
+    else r.max=inp.value===''?'':Math.max(1,+inp.value||1);
+    if(r.max!==''&&r.min>r.max){r.max=r.min;}
+    save();renderRoleRules();
+  });
+  $('#roleTable').querySelectorAll('[data-rrdel]').forEach(b=>b.onclick=()=>{c.roleRules=c.roleRules.filter(x=>x.id!==b.dataset.rrdel);save();renderRoleRules();});
+}
+$('#btnAddRole').onclick=()=>{state.company.roleRules=state.company.roleRules||[];state.company.roleRules.push({id:uid(),role:'',min:1,max:''});save();renderRoleRules();};
+
 /* ---------- EMPLOYEES ---------- */
 function restLabel(r){
+  if(r.kind==='alt'){const[A,B]=r.days;return `${D()[A]}/${D()[B]}: ${t('rl.alt',{d:D()[A],w:dm(monday(parseIso(r.start)))})}`;}
   const days=r.kind==='rec'?(r.days.length===7?t('rl.allDays'):r.days.map(i=>D()[i]).join(', ')):
     (r.from===r.to||!r.to?dm(parseIso(r.from)):t('rl.range',{a:dm(parseIso(r.from)),b:dm(parseIso(r.to))}));
-  const what=r.type==='off'?t('rl.off'):r.type==='after'?t('rl.after',{t:r.time}):r.type==='before'?t('rl.before',{t:r.time}):t('rl.between',{a:r.time,b:r.time2});
+  const what=r.type==='off'?t('rl.off'):r.type==='after'?t('rl.after',{t:r.time}):r.type==='before'?t('rl.before',{t:r.time}):r.type==='only'?t('rl.only',{a:r.time,b:r.time2}):t('rl.between',{a:r.time,b:r.time2});
   return `${days}: ${what}`;
 }
 function renderEmployees(){
@@ -686,6 +794,14 @@ function renderRest(){
   const box=$('#restList');
   if(!editing.restrictions.length){box.innerHTML=`<p class="muted">${t('emp.noRestModal')}</p>`;return;}
   box.innerHTML=editing.restrictions.map(r=>{
+    if(r.kind==='alt'){
+      const sel=(k,v)=>`<select data-r="${r.id}" data-alt="${k}">${DF().map((d,i)=>`<option value="${i}" ${v===i?'selected':''}>${d}</option>`).join('')}</select>`;
+      return `<div class="rest-item"><div class="row" style="justify-content:space-between"><span class="pill">${t('rest.alt')}</span><button class="btn sm danger" data-rm="${r.id}">${t('rest.remove')}</button></div>
+      <div class="row">${sel(0,r.days[0])}<span class="muted">/</span>${sel(1,r.days[1])}
+        <div class="field"><label>${t('rest.altStart',{d:DF()[r.days[0]]})}</label><input type="date" data-r="${r.id}" data-k="start" value="${r.start||''}"></div></div>
+      <div class="row"><span class="muted" style="font-size:12px">${t('rest.altHelp',{a:DF()[r.days[0]],b:DF()[r.days[1]]})}</span>
+        <input data-r="${r.id}" data-k="note" placeholder="${t('rest.note')}" value="${esc(r.note||'')}" style="flex:1;min-width:160px"></div></div>`;
+    }
     const when=r.kind==='rec'
       ?`<div class="daychk">${D().map((d,i)=>`<label><input type="checkbox" data-r="${r.id}" data-day="${i}" ${r.days.includes(i)?'checked':''}>${d}</label>`).join('')}</div>`
       :`<div class="row"><div class="field"><label>${t('rest.from')}</label><input type="date" data-r="${r.id}" data-k="from" value="${r.from||''}"></div><div class="field"><label>${t('rest.to')}</label><input type="date" data-r="${r.id}" data-k="to" value="${r.to||''}"></div></div>`;
@@ -697,24 +813,27 @@ function renderRest(){
         <option value="after" ${r.type==='after'?'selected':''}>${t('rest.after')}</option>
         <option value="before" ${r.type==='before'?'selected':''}>${t('rest.before')}</option>
         <option value="between" ${r.type==='between'?'selected':''}>${t('rest.between')}</option>
+        <option value="only" ${r.type==='only'?'selected':''}>${t('rest.only')}</option>
       </select>
-      ${r.type==='off'?'':`<input type="time" data-r="${r.id}" data-k="time" value="${r.time||''}">`}
-      ${r.type==='between'?`<span class="muted">${t('rest.and')}</span><input type="time" data-r="${r.id}" data-k="time2" value="${r.time2||''}">`:''}
+      ${r.type==='off'?'':`<input type="text" class="tm" inputmode="numeric" maxlength="5" placeholder="HH:MM" autocomplete="off" data-r="${r.id}" data-k="time" value="${r.time||''}">`}
+      ${r.type==='between'||r.type==='only'?`<span class="muted">${t('rest.and')}</span><input type="text" class="tm" inputmode="numeric" maxlength="5" placeholder="HH:MM" autocomplete="off" data-r="${r.id}" data-k="time2" value="${r.time2||''}">`:''}
       <input data-r="${r.id}" data-k="note" placeholder="${t('rest.note')}" value="${esc(r.note||'')}" style="flex:1;min-width:160px">
     </div></div>`;
   }).join('');
   box.querySelectorAll('[data-rm]').forEach(b=>b.onclick=()=>{editing.restrictions=editing.restrictions.filter(r=>r.id!==b.dataset.rm);renderRest();});
+  box.querySelectorAll('[data-alt]').forEach(sl=>sl.onchange=()=>{const r=editing.restrictions.find(x=>x.id===sl.dataset.r);r.days[+sl.dataset.alt]=+sl.value;renderRest();});
   box.querySelectorAll('[data-day]').forEach(cb=>cb.onchange=()=>{const r=editing.restrictions.find(x=>x.id===cb.dataset.r),d=+cb.dataset.day;r.days=cb.checked?[...new Set([...r.days,d])].sort():r.days.filter(x=>x!==d);});
-  box.querySelectorAll('[data-k]').forEach(inp=>inp.onchange=()=>{const r=editing.restrictions.find(x=>x.id===inp.dataset.r);r[inp.dataset.k]=inp.value;if(inp.dataset.k==='type'){if(r.type!=='off'&&!r.time)r.time=r.type==='before'?'10:00':'15:00';if(r.type==='between'&&!r.time2)r.time2='14:00';renderRest();}});
+  box.querySelectorAll('[data-k]').forEach(inp=>inp.onchange=()=>{const r=editing.restrictions.find(x=>x.id===inp.dataset.r);r[inp.dataset.k]=inp.value;if(inp.dataset.k==='type'){if(r.type!=='off'&&!r.time)r.time=r.type==='before'?'10:00':'15:00';if(r.type==='between'&&!r.time2)r.time2='14:00';if(r.type==='only'){if(!r.time)r.time='18:00';if(!r.time2)r.time2='23:00';}renderRest();}});
 }
 $('#btnNewEmp').onclick=()=>openEmp(null);
 $('#btnAddRec').onclick=()=>{editing.restrictions.push({id:uid(),kind:'rec',days:[],type:'off',time:'',note:''});renderRest();};
+$('#btnAddAlt').onclick=()=>{editing.restrictions.push({id:uid(),kind:'alt',days:[5,6],start:dIso(monday(addDays(new Date(),7))),type:'off',note:''});renderRest();};
 $('#btnAddOne').onclick=()=>{const d=dIso(new Date());editing.restrictions.push({id:uid(),kind:'one',from:d,to:d,type:'off',time:'',note:''});renderRest();};
 $('#btnCancel').onclick=()=>$('#empModal').classList.remove('open');
 $('#btnSave').onclick=()=>{
   const name=$('#eName').value.trim();
   if(!name){toast(t('emp.needName'));$('#eName').focus();return;}
-  const bad=editing.restrictions.find(r=>(r.kind==='rec'&&!r.days.length)||(r.kind==='one'&&!r.from)||(r.type!=='off'&&!r.time)||(r.type==='between'&&!r.time2));
+  const bad=editing.restrictions.find(r=>r.kind==='alt'?(r.days[0]===r.days[1]||!r.start):((r.kind==='rec'&&!r.days.length)||(r.kind==='one'&&!r.from)||(r.type!=='off'&&!r.time)||((r.type==='between'||r.type==='only')&&!r.time2)));
   if(bad){toast(t('emp.needRest'));return;}
   editing.restrictions.forEach(r=>{if(r.kind==='one'&&(!r.to||r.to<r.from))r.to=r.from;});
   delete editing._isNew;
@@ -734,9 +853,17 @@ $('#cYes').onclick=()=>{$('#confirmModal').classList.remove('open');confirmCb&&c
 function blocksFor(emp,date){
   const iso=dIso(date),wd=dow(date),out=[];
   emp.restrictions.forEach(r=>{
+    if(r.kind==='alt'){
+      // alternating days: in the reference week the person works days[0] (days[1] blocked), next week the opposite
+      const [A,B]=r.days;if(wd!==A&&wd!==B)return;
+      const wk=Math.round((monday(date)-monday(parseIso(r.start)))/(7*864e5));
+      if(wd===(((wk%2)+2)%2===0?B:A))out.push([-1e9,1e9,r]);
+      return;
+    }
     const hit=r.kind==='rec'?r.days.includes(wd):(iso>=r.from&&iso<=(r.to||r.from));
     if(!hit)return;
     if(r.type==='off')out.push([-1e9,1e9,r]);
+    else if(r.type==='only'){const a=toMin(r.time);let b=toMin(r.time2);if(b<=a)b+=1440;out.push([-1e9,a,r]);out.push([b,1e9,r]);}
     else if(r.type==='after')out.push([toMin(r.time),1e9,r]);
     else if(r.type==='before')out.push([-1e9,toMin(r.time),r]);
     else if(r.type==='between'){let a=toMin(r.time),b=toMin(r.time2);if(b<=a)b+=1440;out.push([a,b,r]);}
@@ -760,45 +887,130 @@ function slotsFor(day){
   slots[n-1]=[e-L,e];
   return slots;
 }
+// absolute day number (stable across ranges), used for rest-between-shifts checks
+const dayNo=d=>Math.round(Date.UTC(d.getFullYear(),d.getMonth(),d.getDate())/864e5);
+const roleKey=e=>norm(e.role||'');
+function activeRoleRules(){return (state.company.roleRules||[]).filter(r=>r.role&&(+r.min>0||(r.max!==''&&r.max!=null)));}
+// how many people of a role (or anyone, role=null) work at minute x, given a list of {emp,s,e}
+function countAt(list,x,role){let n=0;for(const a of list)if(a.s<=x&&a.e>x&&(role==null||roleKey(a.emp)===role))n++;return n;}
 function generate(start,end){
   const c=state.company,emps=state.employees.filter(e=>e.active);
-  const assign={},gaps=[],stats={};
+  const rules=activeRoleRules().map(r=>({role:norm(r.role),min:+r.min||0,max:r.max===''||r.max==null?Infinity:+r.max}));
+  const ruleOf=role=>rules.find(r=>r.role===role);
+  const assign={},stats={};
   emps.forEach(e=>{assign[e.id]={};stats[e.id]={total:0,days:0};});
   let week={},lastEnd={};
   for(let d=new Date(start);d<=end;d=addDays(d,1)){
     if(dow(d)===0||!Object.keys(week).length){week={};emps.forEach(e=>week[e.id]={h:0,d:0});}
     const iso=dIso(d),day=c.days[dow(d)];
     if(!day.open)continue;
-    const dayAbs=Math.round((d-start)/864e5)*1440;
-    const busy=new Set();
+    const dayAbs=dayNo(d)*1440;
+    const busy=new Set(),today=[];
+    const maxConc=(list,s,e,role)=>{let m=0;for(let x=s;x<e;x+=15)m=Math.max(m,countAt(list,x,role));return m;};
+    const minConc=(list,s,e,role)=>{let m=Infinity;for(let x=s;x<e;x+=15)m=Math.min(m,countAt(list,x,role));return m===Infinity?0:m;};
+    const can=(emp,ss,ee)=>{
+      if(busy.has(emp.id))return false;
+      const w=week[emp.id];
+      if(w.d>=emp.maxDays||w.h+(ee-ss)/60>emp.maxHours+1e-9)return false;
+      if(lastEnd[emp.id]!=null&&dayAbs+ss-lastEnd[emp.id]<c.minRest*60)return false;
+      return true;
+    };
+    // a person with alternating days gets priority on the day they are due to work
+    const altDue=emp=>emp.restrictions.some(r=>r.kind==='alt'&&r.days.includes(dow(d)))&&!blocksFor(emp,d).some(b=>b[2].kind==='alt');
+    const rank=(a,b)=>(altDue(b)-altDue(a))||(week[a.id].h-week[b.id].h)||(stats[a.id].total-stats[b.id].total)||a.name.localeCompare(b.name);
+    // periods where the person's role is already at its maximum act like a restriction
+    const roleBlocks=emp=>{
+      const r=ruleOf(roleKey(emp));if(!r||r.max===Infinity)return [];
+      const out=[];let st=null;
+      for(let x=s0;x<=e0;x+=15){const full=x<e0&&countAt(today,x,r.role)>=r.max;if(full&&st==null)st=x;if(!full&&st!=null){out.push([st,x]);st=null;}}
+      return out;
+    };
+    let s0=0,e0=0;
+    // assign one person to [s,e] among those passing filter; falls back to a partial shift
+    const place=(s,e,filter)=>{
+      s0=s;e0=e;
+      const opts=emps.filter(filter).map(emp=>{
+        const bl=blocksFor(emp,d).concat(roleBlocks(emp));
+        if(!overlaps(s,e,bl))return can(emp,s,e)?{emp,f:[s,e],full:true}:null;
+        const f=freeWithin(s,e,bl);
+        return f&&f[1]-f[0]>=c.minPartial*60&&can(emp,f[0],f[1])?{emp,f,full:false}:null;
+      }).filter(Boolean);
+      const full=opts.filter(o=>o.full).sort((x,y)=>rank(x.emp,y.emp));
+      const part=opts.filter(o=>!o.full).sort((x,y)=>((y.f[1]-y.f[0])-(x.f[1]-x.f[0]))||rank(x.emp,y.emp));
+      const o=full[0]||part[0];
+      if(!o)return false;
+      const pick=o.emp,[ps,pe]=o.f,partial=!o.full;
+      busy.add(pick.id);today.push({emp:pick,s:ps,e:pe});
+      assign[pick.id][iso]={s:ps,e:pe,partial};
+      const h=(pe-ps)/60;week[pick.id].h+=h;week[pick.id].d++;stats[pick.id].total+=h;stats[pick.id].days++;
+      lastEnd[pick.id]=dayAbs+pe;
+      return true;
+    };
     slotsFor(day).forEach(([s,e])=>{
-      for(let k=0;k<day.minStaff;k++){
-        const can=(emp,ss,ee)=>{
-          if(busy.has(emp.id))return false;
-          const w=week[emp.id];
-          if(w.d>=emp.maxDays||w.h+(ee-ss)/60>emp.maxHours+1e-9)return false;
-          if(lastEnd[emp.id]!=null&&dayAbs+ss-lastEnd[emp.id]<c.minRest*60)return false;
-          return true;
-        };
-        const rank=(a,b)=>(week[a.id].h-week[b.id].h)||(stats[a.id].total-stats[b.id].total)||a.name.localeCompare(b.name);
-        const pool=emps.filter(emp=>can(emp,s,e)&&!overlaps(s,e,blocksFor(emp,d))).sort(rank);
-        let pick=pool[0],ps=s,pe=e,partial=false;
-        if(!pick){
-          // partial shift inside the person's availability
-          const opts=emps.map(emp=>{const f=freeWithin(s,e,blocksFor(emp,d));return f&&f[1]-f[0]>=c.minPartial*60&&can(emp,f[0],f[1])?{emp,f}:null;}).filter(Boolean)
-            .sort((x,y)=>((y.f[1]-y.f[0])-(x.f[1]-x.f[0]))||rank(x.emp,y.emp));
-          if(opts.length){pick=opts[0].emp;[ps,pe]=opts[0].f;partial=true;
-            if(ps>s)gaps.push({iso,s,e:ps});if(pe<e)gaps.push({iso,s:pe,e});}
-        }
-        if(!pick){gaps.push({iso,s,e});continue;}
-        busy.add(pick.id);
-        assign[pick.id][iso]={s:ps,e:pe,partial};
-        const h=(pe-ps)/60;week[pick.id].h+=h;week[pick.id].d++;stats[pick.id].total+=h;stats[pick.id].days++;
-        lastEnd[pick.id]=dayAbs+pe;
-      }
+      let placedHere=0;
+      // 1) role minimums first
+      rules.filter(r=>r.min>0).forEach(r=>{
+        let need=r.min-minConc(today,s,e,r.role);
+        while(need-->0){if(place(s,e,emp=>roleKey(emp)===r.role))placedHere++;else break;}
+      });
+      // 2) fill up to the total people required at the same time
+      while(placedHere<day.minStaff){if(place(s,e,()=>true))placedHere++;else break;}
     });
   }
-  return {start:dIso(start),end:dIso(end),assign,gaps,empIds:emps.map(e=>e.id)};
+  return {start:dIso(start),end:dIso(end),assign,gaps:[],empIds:emps.map(e=>e.id)};
+}
+
+function renderIssues(){
+  const L=ISS.list;
+  if(!L.length)return `<div class="card noprint vbox ok"><b>✓ ${t('v.okTitle')}</b> <span class="muted">${t('v.okSub')}</span></div>`;
+  const nb=L.filter(i=>i.sev==='bad').length,nw=L.length-nb;
+  const by={};L.forEach(i=>{(by[i.iso]=by[i.iso]||[]).push(i);});
+  return `<div class="card noprint vbox"><h3 style="margin-bottom:4px">${t('v.title')}</h3>
+    <p class="muted" style="margin:0 0 10px">${t('v.sub')} ${nb?`<span class="pill bad">${t('v.nBad',{n:nb})}</span>`:''}${nw?`<span class="pill warn">${t('v.nWarn',{n:nw})}</span>`:''}</p>
+    ${Object.keys(by).sort().map(iso=>`<div style="margin-bottom:6px"><b>${D()[dow(parseIso(iso))]} ${dm(parseIso(iso))}</b>: ${by[iso].map(i=>`<span class="pill ${i.sev}">${esc(i.text)}</span>`).join('')}</div>`).join('')}</div>`;
+}
+
+/* ---------- schedule verification (shown on screen, never printed) ---------- */
+function verifySchedule(){
+  const out=[];if(!current)return out;
+  const c=state.company,rules=activeRoleRules();
+  const emps=current.empIds.map(id=>state.employees.find(e=>e.id===id)).filter(Boolean);
+  const add=(iso,sev,text,eid)=>out.push({iso,sev,text,eid});
+  const runs=(s,e,test)=>{const r=[];let st=null;for(let x=s;x<=e;x+=15){const bad=x<e&&test(x);if(bad&&st==null)st=x;if(!bad&&st!=null){r.push([st,x]);st=null;}}return r;};
+  const start=parseIso(current.start),end=parseIso(current.end);
+  for(let d=new Date(start);d<=end;d=addDays(d,1)){
+    const iso=dIso(d),day=c.days[dow(d)];
+    const list=emps.map(emp=>{const a=current.assign[emp.id]?.[iso];return a?{emp,s:a.s,e:a.e}:null;}).filter(Boolean);
+    if(!day.open){list.forEach(a=>add(iso,'bad',t('v.closedDay',{n:a.emp.name}),a.emp.id));continue;}
+    const s=toMin(day.start);let e=toMin(day.end);if(e<=s)e+=1440;
+    runs(s,e,x=>countAt(list,x,null)<day.minStaff).forEach(([a,b])=>add(iso,'bad',t('v.coverage',{a:fmt(a),b:fmt(b),n:countAt(list,a,null),m:day.minStaff})));
+    rules.forEach(r=>{
+      const rk=norm(r.role);
+      if(+r.min>0)runs(s,e,x=>countAt(list,x,rk)<+r.min).forEach(([a,b])=>add(iso,'bad',t('v.roleMin',{r:r.role,a:fmt(a),b:fmt(b),n:countAt(list,a,rk),m:r.min})));
+      if(r.max!==''&&r.max!=null)runs(s,e,x=>countAt(list,x,rk)>+r.max).forEach(([a,b])=>add(iso,'warn',t('v.roleMax',{r:r.role,a:fmt(a),b:fmt(b),n:countAt(list,a,rk),m:r.max})));
+    });
+    list.forEach(a=>{
+      const bl=blocksFor(a.emp,d).filter(([x,y])=>a.s<y&&a.e>x);
+      if(bl.length)add(iso,'bad',t('v.restriction',{n:a.emp.name,r:restLabel(bl[0][2])}),a.emp.id);
+      if(a.s<s||a.e>e)add(iso,'warn',t('v.outside',{n:a.emp.name}),a.emp.id);
+    });
+  }
+  // weekly limits and rest between shifts
+  emps.forEach(emp=>{
+    const byWeek={};let prev=null;
+    Object.keys(current.assign[emp.id]||{}).sort().forEach(iso=>{
+      const a=current.assign[emp.id][iso],d=parseIso(iso),wk=dIso(monday(d));
+      byWeek[wk]=byWeek[wk]||{h:0,d:0};byWeek[wk].h+=(a.e-a.s)/60;byWeek[wk].d++;
+      const absS=dayNo(d)*1440+a.s;
+      if(prev!=null&&absS-prev<c.minRest*60)add(iso,'warn',t('v.rest',{n:emp.name,h:((absS-prev)/60).toFixed(1).replace('.0',''),m:c.minRest}),emp.id);
+      prev=dayNo(d)*1440+a.e;
+    });
+    Object.entries(byWeek).forEach(([wk,v])=>{
+      if(v.h>emp.maxHours+1e-9)add(wk,'warn',t('v.hours',{n:emp.name,h:v.h.toFixed(1).replace('.0',''),m:emp.maxHours,w:dm(parseIso(wk))}),emp.id);
+      if(v.d>emp.maxDays)add(wk,'warn',t('v.days',{n:emp.name,d:v.d,m:emp.maxDays,w:dm(parseIso(wk))}),emp.id);
+    });
+  });
+  return out;
 }
 
 /* ---------- SCHEDULE RENDER ---------- */
@@ -811,9 +1023,22 @@ function coverage(iso){
   return {min:minc,need:day.minStaff};
 }
 function showEmpty(msgKey){$('#schedOut').innerHTML=`<div class="card empty">${t(msgKey)}</div>`;$('#schedStats').innerHTML='';}
+let ISS={cell:new Map(),day:new Map(),list:[]};
+function buildIssues(){
+  const list=verifySchedule(),cell=new Map(),day=new Map();
+  list.forEach(i=>{
+    if(i.eid){const k=i.eid+'|'+i.iso;const v=cell.get(k)||{sev:'warn',msgs:[]};if(i.sev==='bad')v.sev='bad';v.msgs.push(i.text);cell.set(k,v);}
+    else{const v=day.get(i.iso)||{sev:'warn',msgs:[]};if(i.sev==='bad')v.sev='bad';v.msgs.push(i.text);day.set(i.iso,v);}
+  });
+  ISS={cell,day,list};
+}
+// class + tooltip for a flagged shift; empty when there is nothing to flag
+const flagC=(eid,iso)=>{const v=ISS.cell.get(eid+'|'+iso);return v?` flag-${v.sev}`:'';};
+const flagT=(eid,iso,base)=>{const v=ISS.cell.get(eid+'|'+iso);return esc([base,...(v?v.msgs:[])].filter(Boolean).join('\n'));};
+const dayFlag=iso=>{const v=ISS.day.get(iso);return v?`<span class="dflag ${v.sev}" title="${esc(v.msgs.join('\n'))}">!</span>`:'';};
 function renderSchedule(){
   if(!current){showEmpty('sch.empty');return;}
-  state.schedule=current;save();
+  state.schedule=current;save();buildIssues();
   const start=parseIso(current.start),end=parseIso(current.end);
   const emps=current.empIds.map(id=>state.employees.find(e=>e.id===id)).filter(Boolean);
   const weeks=[];let wk=[];
@@ -827,13 +1052,13 @@ function renderSchedule(){
   else if(state.viewMode==='board'){html+=renderBoard(weeks,emps);}
   else weeks.forEach(days=>{
     html+=`<div class="card weekblock"><h4>${t('sch.weekOf',{a:dm(days[0]),b:dm(days[days.length-1])})}</h4><div class="sched-wrap"><table class="sched"><tr><th class="name">${t('sch.employee')}</th>`;
-    days.forEach(d=>{const op=state.company.days[dow(d)].open;html+=`<th class="${op?'':'closed'}">${D()[dow(d)]}<small>${dm(d)}</small></th>`;});
+    days.forEach(d=>{const op=state.company.days[dow(d)].open;html+=`<th class="${op?'':'closed'}">${D()[dow(d)]}${dayFlag(dIso(d))}<small>${dm(d)}</small></th>`;});
     html+=`<th>${t('sch.hours')}</th></tr>`;
     emps.forEach(e=>{
       let h=0;html+=`<tr><td class="name"><button class="btn sm danger" style="float:right;padding:0 7px" title="${t('sch.removeFromSchedule')}" data-rmp="${e.id}">×</button><b>${esc(e.name)}</b><br><span class="muted" style="font-size:12px">${esc(e.role||'')}</span></td>`;
       days.forEach(d=>{
         const iso=dIso(d),a=current.assign[e.id][iso],op=state.company.days[dow(d)].open;
-        if(a){h+=(a.e-a.s)/60;html+=`<td class="shift ${a.partial?'partial':''}" data-e="${e.id}" data-d="${iso}">${fmt(a.s)}<br><span class="e">${fmt(a.e)}</span></td>`;}
+        if(a){h+=(a.e-a.s)/60;html+=`<td class="shift ${a.partial?'partial':''}${flagC(e.id,iso)}" title="${flagT(e.id,iso,'')}" data-e="${e.id}" data-d="${iso}">${fmt(a.s)}<br><span class="e">${fmt(a.e)}</span></td>`;}
         else if(!op)html+=`<td class="closed">${t('sch.closed')}</td>`;
         else{const bl=blocksFor(e,d).some(b=>b[0]<-1e8&&b[1]>1e8);html+=bl?`<td class="blocked" data-e="${e.id}" data-d="${iso}" title="${t('sch.unavailTitle')}">${t('sch.unavail')}</td>`:`<td class="off" data-e="${e.id}" data-d="${iso}">${t('sch.off')}</td>`;}
       });
@@ -847,14 +1072,10 @@ function renderSchedule(){
   else if(state.viewMode==='board')html+=`<p class="muted noprint">${t('board.note')}</p>`;
   else{const L=t('sch.legend');html+=`<div class="legend"><span style="--c:var(--accent-soft)">${L[0]}</span><span style="--c:var(--warn-soft)">${L[1]}</span><span style="--c:var(--line)">${L[2]}</span><span style="--c:var(--ok-soft)">${L[3]}</span><span style="--c:var(--bad-soft)">${L[4]}</span></div>
   <p class="muted noprint">${t('sch.clickCell')}</p>`;}
-  if(current.gaps.length){
-    const merged={};current.gaps.forEach(g=>{(merged[g.iso]=merged[g.iso]||[]).push(fmt(g.s)+' - '+fmt(g.e));});
-    html+=`<div class="card"><h3>${t('sch.gapsTitle')}</h3>${Object.entries(merged).map(([iso,l])=>`<div style="margin-bottom:6px"><b>${D()[dow(parseIso(iso))]} ${dm(parseIso(iso))}</b>: ${[...new Set(l)].map(x=>`<span class="pill bad">${x}</span>`).join('')}</div>`).join('')}
-    <p class="muted" style="margin:8px 0 0">${t('sch.gapsHelp')}</p></div>`;
-  }
+  html+=renderIssues();
   $('#schedOut').innerHTML=html;
   let totalH=0,shifts=0;emps.forEach(e=>Object.values(current.assign[e.id]).forEach(a=>{totalH+=(a.e-a.s)/60;shifts++;}));
-  let covOk=0,covN=0;for(let d=new Date(start);d<=end;d=addDays(d,1)){const cv=coverage(dIso(d));if(cv){covN++;if(cv.min>=cv.need)covOk++;}}
+  let covOk=0,covN=0;for(let d=new Date(start);d<=end;d=addDays(d,1)){const iso=dIso(d),cv=coverage(iso);if(cv){covN++;const dv=ISS.day.get(iso);if(cv.min>=cv.need&&!(dv&&dv.sev==='bad'))covOk++;}}
   $('#schedStats').innerHTML=`<div class="stats"><div class="stat"><b>${emps.length}</b><span>${t('st.people')}</span></div><div class="stat"><b>${shifts}</b><span>${t('st.shifts')}</span></div><div class="stat"><b>${totalH.toFixed(0)} h</b><span>${t('st.hours')}</span></div><div class="stat"><b>${covOk}/${covN}</b><span>${t('st.cov')}</span></div></div>`;
   $('#schedOut').querySelectorAll('[data-e][data-d]').forEach(td=>td.onclick=()=>openCell(td.dataset.e,td.dataset.d));
   const ab=$('#btnAddPerson');
@@ -888,14 +1109,14 @@ function renderSimple(weeks,emps){
       return{iso,per,folga};
     });
     h+=`<table class="simple" style="margin-bottom:10px"><tr class="wk"><th colspan="8">${t('simple.range',{a:dmy(days[0]),b:dmy(days[days.length-1])})}</th></tr>
-    <tr class="hd"><th>${t('simple.staff')}</th>${t('daysUpper').map(x=>`<th>${x}</th>`).join('')}</tr>`;
+    <tr class="hd"><th>${t('simple.staff')}</th>${t('daysUpper').map((x,i)=>`<th>${x}${dayFlag(dIso(full[i]))}</th>`).join('')}</tr>`;
     PER.forEach((p,pi)=>{
       const n=Math.max(1,...cols.map(c=>c.per[pi].length));
       for(let r=0;r<n;r++){
         h+=`<tr>${r===0?`<td class="per" rowspan="${n}">${p}</td>`:''}`;
         cols.forEach(c=>{
           const it=c.per[pi][r];
-          h+=c.closed?'<td class="closed"></td>':it?`<td><span class="nm ${it.a.partial?'partial':''}" data-e="${it.e.id}" data-d="${c.iso}" title="${esc(it.e.name)}: ${fmt(it.a.s)} - ${fmt(it.a.e)}">${esc(firstName(it.e.name))}</span></td>`:'<td></td>';
+          h+=c.closed?'<td class="closed"></td>':it?`<td><span class="nm ${it.a.partial?'partial':''}${flagC(it.e.id,c.iso)}" data-e="${it.e.id}" data-d="${c.iso}" title="${flagT(it.e.id,c.iso,it.e.name+': '+fmt(it.a.s)+' - '+fmt(it.a.e))}">${esc(firstName(it.e.name))}</span></td>`:'<td></td>';
         });
         h+='</tr>';
       }
@@ -917,7 +1138,7 @@ function renderBoard(weeks,emps){
     h+=`<div class="board-week"><h4>${t('sch.weekOf',{a:dm(days[0]),b:dm(days[days.length-1])})}</h4><div class="board">`;
     full.forEach(d=>{
       const iso=dIso(d),day=state.company.days[dow(d)],inRange=iso>=current.start&&iso<=current.end;
-      const head=`<div class="bhead"><div><div class="dn">${D()[dow(d)]}</div><div class="dd">${p2(d.getDate())}</div></div>`;
+      const head=`<div class="bhead"><div><div class="dn">${D()[dow(d)]}${dayFlag(iso)}</div><div class="dd">${p2(d.getDate())}</div></div>`;
       if(!inRange||!day.open){h+=`<div class="bcol closed">${head}${inRange?`<span class="muted" style="font-size:12px">${t('sch.closed')}</span>`:''}</div></div>`;return;}
       const cv=coverage(iso);
       h+=`<div class="bcol ${iso===today?'today':''}">${head}<span class="pill ${cv.min>=cv.need?'ok':'bad'}" title="${t('sch.coverage')}">${cv.min}/${cv.need}</span></div>`;
@@ -928,7 +1149,7 @@ function renderBoard(weeks,emps){
         l.sort((x,y)=>x.a.s-y.a.s||x.e.name.localeCompare(y.e.name));
         h+=`<div class="bper">${cap(PER[pi])}</div>`;
         l.forEach(({e,a})=>{const hu=hueOf(e.id);
-          h+=`<div class="bcard ${a.partial?'partial':''}" style="--h:${hu}" data-e="${e.id}" data-d="${iso}" title="${esc(e.name)}${e.role?' · '+esc(e.role):''}">
+          h+=`<div class="bcard ${a.partial?'partial':''}${flagC(e.id,iso)}" style="--h:${hu}" data-e="${e.id}" data-d="${iso}" title="${flagT(e.id,iso,e.name+(e.role?' · '+e.role:''))}">
             <div class="av" style="--h:${hu}">${esc(initials(e.name))}</div>
             <div style="min-width:0"><div class="bn">${esc(firstName(e.name))}</div><div class="bt">${fmt(a.s)}-${fmt(a.e)}${a.partial?' <b>●</b>':''}</div></div></div>`;});
       });
@@ -971,7 +1192,10 @@ function warnCell(){
 $('#cCancel').onclick=()=>$('#cellModal').classList.remove('open');
 $('#cClear').onclick=()=>{delete current.assign[cellCtx.eid][cellCtx.iso];$('#cellModal').classList.remove('open');renderSchedule();toast(t('t.removed'));};
 $('#cSave').onclick=()=>{
-  let s=toMin($('#cStart').value),e=toMin($('#cEnd').value);if(s==null||e==null)return;if(e<=s)e+=1440;
+  const ns=normTime($('#cStart').value),ne=normTime($('#cEnd').value);
+  if(!ns||!ne){toast(t('tm.invalid'));return;}
+  $('#cStart').value=ns;$('#cEnd').value=ne;
+  let s=toMin(ns),e=toMin(ne);if(e<=s)e+=1440;
   const {eid,iso}=cellCtx,to=$('#cPerson').value,d=parseIso(iso);
   const emp=state.employees.find(x=>x.id===to);
   let msg=t('t.adjusted');
@@ -1054,13 +1278,15 @@ function parseCsv(text){
 }
 const norm=x=>String(x||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').trim();
 const DAY_KEYS={mon:0,seg:0,tue:1,ter:1,wed:2,qua:2,thu:3,qui:3,fri:4,sex:4,sat:5,sab:5,sun:6,dom:6};
-const KW={off:'off',folga:'off',indisponivel:'off',after:'after',depois:'after',before:'before',antes:'before',between:'between',entre:'between'};
+const KW={off:'off',folga:'off',indisponivel:'off',after:'after',depois:'after',before:'before',antes:'before',between:'between',entre:'between',
+  only:'only',somente:'only',apenas:'only',so:'only',alternate:'alt',alternating:'alt',alterna:'alt',alternar:'alt',alternado:'alt',intercala:'alt',intercalar:'alt',intercalado:'alt'};
 
 /* restriction <-> text */
 function restToText(r){
   const kw=t('io.kw');
+  if(r.kind==='alt'){const note=(r.note||'').replace(/[()|]/g,' ').trim();return `${D()[r.days[0]]}/${D()[r.days[1]]} ${kw.alt} ${r.start}`+(note?' ('+note+')':'');}
   const days=r.kind==='rec'?(r.days.length===7?t('io.all'):r.days.map(i=>D()[i]).join(',')):(r.to&&r.to!==r.from?r.from+'..'+r.to:r.from);
-  const rule=r.type==='off'?kw.off:r.type==='between'?kw.between+' '+r.time+'-'+r.time2:kw[r.type]+' '+r.time;
+  const rule=r.type==='off'?kw.off:(r.type==='between'||r.type==='only')?kw[r.type]+' '+r.time+'-'+r.time2:kw[r.type]+' '+r.time;
   const note=(r.note||'').replace(/[()|]/g,' ').trim();
   return days+' '+rule+(note?' ('+note+')':'');
 }
@@ -1068,14 +1294,20 @@ function textToRest(seg){
   let x=seg.trim(),note='';
   const m=x.match(/\(([^)]*)\)\s*$/);if(m){note=m[1].trim();x=x.slice(0,m.index).trim();}
   const nx=norm(x);
-  const km=nx.match(/\b(off|folga|indisponivel|after|depois|before|antes|between|entre)\b/);
+  const km=nx.match(/\b(off|folga|indisponivel|after|depois|before|antes|between|entre|only|somente|apenas|so|alternate|alternating|alterna|alternar|alternado|intercala|intercalar|intercalado)\b/);
   if(!km)return null;
   const type=KW[km[1]],daysPart=nx.slice(0,km.index).trim(),rest=nx.slice(km.index+km[1].length);
+  if(type==='alt'){
+    const ds=daysPart.split(/[,\s/]+/).filter(Boolean).map(d=>DAY_KEYS[d.slice(0,3)]);
+    if(ds.length!==2||ds.some(d=>d===undefined)||ds[0]===ds[1])return null;
+    const dt=rest.match(/\d{4}-\d{2}-\d{2}/);
+    return {id:uid(),kind:'alt',days:ds,start:dt?dt[0]:dIso(monday(new Date())),type:'off',note};
+  }
   const times=rest.match(/\d{1,2}:\d{2}/g)||[];
   const tt=h=>{const[a,b]=h.split(':');return p2(+a)+':'+b;};
   const r={id:uid(),type,time:'',note};
   if(type==='after'||type==='before'){if(!times[0])return null;r.time=tt(times[0]);}
-  if(type==='between'){if(times.length<2)return null;r.time=tt(times[0]);r.time2=tt(times[1]);}
+  if(type==='between'||type==='only'){if(times.length<2)return null;r.time=tt(times[0]);r.time2=tt(times[1]);}
   const dates=daysPart.match(/\d{4}-\d{2}-\d{2}/g);
   if(dates){r.kind='one';r.from=dates[0];r.to=dates[1]||dates[0];if(r.to<r.from)r.to=r.from;return r;}
   let days;
