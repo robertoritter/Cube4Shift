@@ -150,6 +150,16 @@ textarea{width:100%;min-height:160px;font-family:'JetBrains Mono',monospace;font
 /* compensatory day-off note at the top of the following week (screen only) */
 .compnote{display:flex;flex-wrap:wrap;align-items:center;gap:4px;font-size:12px;margin:-2px 0 8px;color:var(--muted)}
 .compnote b{color:var(--ink);margin-right:4px}
+/* manual (pinned) and inherited days: small dot, screen only */
+.lk{background-image:radial-gradient(circle at 7px 7px,var(--violet) 3px,transparent 3.5px)!important}
+.inh{background-image:radial-gradient(circle at 7px 7px,var(--muted) 3px,transparent 3.5px)!important}
+.boff .av.lk,.boff .av.inh{outline:2px solid var(--violet);outline-offset:1px}
+body.printing .lk,body.printing .inh{background-image:none!important}
+.sbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.sbar .grow{flex:1}
+#choiceModal .btn{text-align:left;padding:10px 14px}
+#choiceModal .btn small{display:block;color:var(--muted);font-weight:400;margin-top:2px}
+#choiceModal .btn.primary small{color:#fff;opacity:.85}
 /* conflict flags: on screen only */
 .flag-bad{box-shadow:inset 0 0 0 2px var(--bad)!important}
 .flag-warn{box-shadow:inset 0 0 0 2px var(--warn)!important}
@@ -415,6 +425,16 @@ body.printing #printFoot{display:flex;justify-content:flex-end;margin-top:2px}
   </div>
 </div>
 
+<!-- CHOICE MODAL (existing schedule) -->
+<div class="modal-bg" id="choiceModal">
+  <div class="modal" style="max-width:520px">
+    <h3 id="chTitle"></h3>
+    <p class="muted" id="chText" style="margin-top:-6px"></p>
+    <div style="display:grid;gap:8px" id="chBtns"></div>
+    <div class="row" style="justify-content:flex-end;margin-top:12px"><button class="btn" id="chCancel" data-i18n="btn.cancel"></button></div>
+  </div>
+</div>
+
 <!-- CELL MODAL -->
 <div class="modal-bg" id="cellModal">
   <div class="modal" style="max-width:440px">
@@ -425,7 +445,9 @@ body.printing #printFoot{display:flex;justify-content:flex-end;margin-top:2px}
       <div class="field"><label data-i18n="cell.end"></label><input type="text" class="tm" inputmode="numeric" maxlength="5" placeholder="HH:MM" autocomplete="off" id="cEnd"></div>
     </div>
     <p class="muted" id="cellWarn"></p>
+    <p class="muted" id="cellLock" style="font-size:12px"></p>
     <div class="row" style="justify-content:flex-end;margin-top:10px">
+      <button class="btn sm" id="cUnlock" data-i18n="cell.unlock"></button>
       <button class="btn danger" id="cClear" data-i18n="cell.remove"></button>
       <button class="btn" id="cCancel" data-i18n="btn.cancel"></button>
       <button class="btn primary" id="cSave" data-i18n="btn.save"></button>
@@ -447,7 +469,7 @@ en:{
   'daysUpper':['MONDAY','TUESDAY','WEDNESDAY','THURSDAY','FRIDAY','SATURDAY','SUNDAY'],
   'sch.title':'Generate schedule',
   'sch.sub':'Pick the period. The schedule follows company hours, minimum coverage, each person\'s restrictions, weekly limits and rest between shifts.',
-  'sch.period':'Period','sch.weekly':'Weekly','sch.monthly':'Monthly','sch.weekPick':'Week (any day in it)','sch.month':'Month',
+  'sch.period':'Period','sch.weekly':'Weekly','sch.monthly':'Monthly (complete weeks)','sch.weekPick':'Week (any day in it)','sch.month':'Month',
   'sch.generate':'Generate schedule','sch.view':'View','sch.viewDetail':'Detailed (by person)','sch.viewSimple':'Simplified (print)','sch.viewBoard':'Board (cards)','sch.copyCsv':'Copy CSV',
   'sch.empty':'No schedule generated yet. Click "Generate schedule".',
   'sch.inSchedule':'People in this schedule:','sch.addToSchedule':'+ Add to schedule','sch.allIn':'Everyone registered is already in the schedule.',
@@ -463,6 +485,16 @@ en:{
   'months':['January','February','March','April','May','June','July','August','September','October','November','December'],
   'co.sundayOff':'Sundays off per month (minimum)','co.sundayOffSub':'Each person gets at least this many Sundays off in every month, in rotation so no Sunday is left short. People already off on Sundays by restriction (e.g. alternating weekends) count automatically. Checked in monthly schedules; 0 turns it off.',
   'v.sunday':'{n}: {k} Sunday(s) off in {m} (minimum {q})',
+'st.draft':'Draft','st.closed':'Closed on {d}','st.manual':'{n} manual change(s)','st.manualTip':'Days changed by hand are kept when recalculating (violet dot). Grey dot: day inherited from a neighbouring saved schedule.',
+  'st.saved':'Saved schedules','st.recalc':'Recalculate','st.recalcTip':'Redo the automatic part keeping every manual change','st.close':'Close schedule','st.reopen':'Reopen',
+  'st.recalcConfirm':'Recalculate this schedule? The {n} manual change(s) and the days inherited from neighbouring schedules are kept; the rest is redone.',
+  'st.recalcDone':'Schedule recalculated keeping {n} manual change(s)','st.closeConfirm':'Close this schedule? It becomes final: no changes until it is reopened, and the next schedules use it as reference.',
+  'st.closedToast':'Schedule closed','st.reopenConfirm':'Reopen this schedule for changes?','st.reopened':'Schedule reopened','st.isClosed':'This schedule is closed. Reopen it to make changes.',
+  'ch.title':'There is already a schedule for {l}','ch.text':'Last changed on {d}, with {n} manual change(s). What do you want to do?',
+  'ch.closedText':'It was closed on {d}. To change it, open it and click Reopen.',
+  'ch.open':'Open the saved schedule','ch.openSub':'Shows it exactly as it was saved','ch.recalc':'Recalculate keeping manual changes','ch.recalcSub':'Keeps the {n} manual change(s) and redoes the rest with the current rules',
+  'ch.fresh':'Generate from scratch','ch.freshSub':'Discards the {n} manual change(s)','ch.freshConfirm':'Discard the {n} manual change(s) and generate again from scratch?',
+  'cell.unlock':'Release','cell.pinned':'Manual change: kept when recalculating.','cell.inh':'Day taken from the saved schedule {s}.','cell.unlocked':'Day released: the next recalculation can change it',
   'comp.title':'Compensatory day off this week:','comp.ok':'extra day off given','comp.missing':'extra day off missing',
   'hol.fetch':'Update from internet','hol.srcCalc':'Source: built-in calculation (works offline)','hol.srcOnline':'Source: {s}, updated {d}',
   'hol.onlineOk':'{n} national holidays downloaded from {s}','hol.onlineFail':'Could not reach the holiday service (no internet or blocked here). The built-in calculation is being used.',
@@ -558,7 +590,7 @@ pt:{
   'daysUpper':['SEGUNDA','TERÇA','QUARTA','QUINTA','SEXTA','SÁBADO','DOMINGO'],
   'sch.title':'Gerar escala',
   'sch.sub':'Escolha o período. A escala respeita horário da empresa, cobertura mínima, restrições de cada pessoa, limite semanal e descanso entre jornadas.',
-  'sch.period':'Período','sch.weekly':'Semanal','sch.monthly':'Mensal','sch.weekPick':'Semana (qualquer dia dela)','sch.month':'Mês',
+  'sch.period':'Período','sch.weekly':'Semanal','sch.monthly':'Mensal (semanas completas)','sch.weekPick':'Semana (qualquer dia dela)','sch.month':'Mês',
   'sch.generate':'Gerar escala','sch.view':'Visualização','sch.viewDetail':'Detalhada (por pessoa)','sch.viewSimple':'Simplificada (impressão)','sch.viewBoard':'Quadro (cartões)','sch.copyCsv':'Copiar CSV',
   'sch.empty':'Nenhuma escala gerada ainda. Clique em "Gerar escala".',
   'sch.inSchedule':'Pessoas nesta escala:','sch.addToSchedule':'+ Adicionar à escala','sch.allIn':'Todos os cadastrados já estão na escala.',
@@ -574,6 +606,16 @@ pt:{
   'months':['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'],
   'co.sundayOff':'Domingos de folga por mês (mínimo)','co.sundayOffSub':'Cada pessoa tem pelo menos essa quantidade de domingos de folga em todo mês, em rodízio para nenhum domingo ficar desfalcado. Quem já folga aos domingos por restrição (ex.: fins de semana alternados) conta automaticamente. Verificado na escala mensal; 0 desliga a regra.',
   'v.sunday':'{n}: {k} domingo(s) de folga em {m} (mínimo {q})',
+'st.draft':'Rascunho','st.closed':'Fechada em {d}','st.manual':'{n} ajuste(s) manual(is)','st.manualTip':'Dias alterados à mão são mantidos ao recalcular (ponto violeta). Ponto cinza: dia herdado de uma escala vizinha salva.',
+  'st.saved':'Escalas salvas','st.recalc':'Recalcular','st.recalcTip':'Refaz a parte automática mantendo todos os ajustes manuais','st.close':'Fechar escala','st.reopen':'Reabrir',
+  'st.recalcConfirm':'Recalcular esta escala? Os {n} ajuste(s) manual(is) e os dias herdados de escalas vizinhas são mantidos; o resto é refeito.',
+  'st.recalcDone':'Escala recalculada mantendo {n} ajuste(s) manual(is)','st.closeConfirm':'Fechar esta escala? Ela fica definitiva: sem alterações até ser reaberta, e as próximas escalas passam a usá-la como referência.',
+  'st.closedToast':'Escala fechada','st.reopenConfirm':'Reabrir esta escala para alterações?','st.reopened':'Escala reaberta','st.isClosed':'Esta escala está fechada. Reabra para fazer alterações.',
+  'ch.title':'Já existe uma escala para {l}','ch.text':'Última alteração em {d}, com {n} ajuste(s) manual(is). O que você quer fazer?',
+  'ch.closedText':'Ela foi fechada em {d}. Para alterar, abra e clique em Reabrir.',
+  'ch.open':'Abrir a escala salva','ch.openSub':'Mostra exatamente como foi salva','ch.recalc':'Recalcular mantendo os ajustes manuais','ch.recalcSub':'Mantém os {n} ajuste(s) manual(is) e refaz o resto com as regras atuais',
+  'ch.fresh':'Gerar do zero','ch.freshSub':'Descarta os {n} ajuste(s) manual(is)','ch.freshConfirm':'Descartar os {n} ajuste(s) manual(is) e gerar de novo do zero?',
+  'cell.unlock':'Liberar','cell.pinned':'Ajuste manual: mantido ao recalcular.','cell.inh':'Dia vindo da escala salva {s}.','cell.unlocked':'Dia liberado: o próximo recálculo pode alterá-lo',
   'comp.title':'Folga compensatória nesta semana:','comp.ok':'folga extra garantida','comp.missing':'falta a folga extra',
   'hol.fetch':'Atualizar pela internet','hol.srcCalc':'Fonte: cálculo automático (funciona sem internet)','hol.srcOnline':'Fonte: {s}, atualizado em {d}',
   'hol.onlineOk':'{n} feriados nacionais baixados de {s}','hol.onlineFail':'Não foi possível acessar o serviço de feriados (sem internet ou bloqueado aqui). O cálculo automático está sendo usado.',
@@ -1041,6 +1083,17 @@ const roleKey=e=>norm(e.role||'');
 function activeRoleRules(){return (state.company.roleRules||[]).filter(r=>r.role&&(+r.min>0||(r.max!==''&&r.max!=null)));}
 // how many people of a role (or anyone, role=null) work at minute x, given a list of {emp,s,e}
 function countAt(list,x,role){let n=0;for(const a of list)if(a.s<=x&&a.e>x&&(role==null||roleKey(a.emp)===role))n++;return n;}
+// Other saved schedules covering a date (closed ones first, then the most recently changed)
+function otherSchedFor(iso,exceptKey){
+  return Object.values(state.schedules||{}).filter(x=>x.key!==exceptKey&&x.start<=iso&&iso<=x.end)
+    .sort((a,b)=>((b.closed?1:0)-(a.closed?1:0))||String(b.updatedAt||'').localeCompare(String(a.updatedAt||'')))[0]||null;
+}
+function ctxShift(eid,iso,exceptKey){const s=otherSchedFor(iso,exceptKey);return s&&s.assign[eid]?s.assign[eid][iso]||null:null;}
+// shift of a person on a date: from the open schedule when inside it, otherwise from the neighbouring saved schedules
+function shiftAt(eid,iso){
+  if(current&&iso>=current.start&&iso<=current.end)return current.assign[eid]?.[iso]||null;
+  return ctxShift(eid,iso,current&&current.key);
+}
 // Sundays off per month: months whose Sundays are all inside [start,end]
 function monthsInRange(start,end){
   const out=[];let y=start.getFullYear(),m=start.getMonth();
@@ -1054,15 +1107,17 @@ function monthsInRange(start,end){
 const sundayOffMin=()=>{const v=state.company.sundayOffMin;return v==null?1:Math.max(0,+v||0);};
 const offAllDay=(emp,d)=>blocksFor(emp,d).some(b=>b[0]<-1e8&&b[1]>1e8);
 // reserve Sundays off in rotation, so every person gets the minimum per month without emptying any Sunday
-function planSundays(start,end,emps){
+function planSundays(start,end,emps,fixedFn,lockedFn){
   const prot={},need=sundayOffMin();if(!need)return prot;
+  fixedFn=fixedFn||(()=>null);lockedFn=lockedFn||(()=>false);
   monthsInRange(start,end).forEach(({sundays})=>{
     const open=sundays.filter(dayOpen);
     const load={};open.forEach(su=>load[dIso(su)]=0);
     emps.forEach((e,idx)=>{
-      const natural=sundays.length-open.length+open.filter(su=>offAllDay(e,su)).length;
+      const lockedOff=su=>lockedFn(e.id,dIso(su))&&!fixedFn(e.id,dIso(su));
+      const natural=sundays.length-open.length+open.filter(su=>offAllDay(e,su)||lockedOff(su)).length;
       let missing=need-natural;
-      const cand=open.filter(su=>!offAllDay(e,su)).map(dIso);
+      const cand=open.filter(su=>!offAllDay(e,su)&&!lockedFn(e.id,dIso(su))).map(dIso);
       while(missing-->0&&cand.length){
         cand.sort((a,b)=>load[a]-load[b]||((cand.indexOf(a)+idx)%cand.length)-((cand.indexOf(b)+idx)%cand.length));
         const iso=cand.shift();(prot[e.id]=prot[e.id]||new Set()).add(iso);load[iso]++;
@@ -1071,14 +1126,31 @@ function planSundays(start,end,emps){
   });
   return prot;
 }
-function generate(start,end){
+// opts.key: schedule key; opts.locks/opts.assign: manual adjustments to keep (recalculate)
+function generate(start,end,opts){
+  opts=opts||{};
   const c=state.company,emps=state.employees.filter(e=>e.active);
   const rules=activeRoleRules().map(r=>({role:norm(r.role),min:+r.min||0,max:r.max===''||r.max==null?Infinity:+r.max}));
   const ruleOf=role=>rules.find(r=>r.role===role);
   const assign={},stats={};
   emps.forEach(e=>{assign[e.id]={};stats[e.id]={total:0,days:0};});
-  const sunProt=planSundays(start,end,emps),isProt=(emp,iso)=>!!(sunProt[emp.id]&&sunProt[emp.id].has(iso));
+  // locks: 'inh' = day inherited from a neighbouring saved schedule, 'set' = manual shift, 'off' = manual day off
+  const locks={},key=opts.key;
+  for(let d=new Date(start);d<=end;d=addDays(d,1)){
+    const iso=dIso(d),src=otherSchedFor(iso,key);if(!src)continue;
+    emps.forEach(e=>{if(!src.empIds.includes(e.id))return;locks[e.id+'|'+iso]='inh';const a=src.assign[e.id]&&src.assign[e.id][iso];if(a)assign[e.id][iso]={s:a.s,e:a.e,partial:!!a.partial};});
+  }
+  Object.entries(opts.locks||{}).forEach(([k,v])=>{
+    if(v==='inh')return;
+    const [eid,iso]=k.split('|');if(!assign[eid]||iso<dIso(start)||iso>dIso(end))return;
+    if(v==='set'){const a=opts.assign&&opts.assign[eid]&&opts.assign[eid][iso];if(!a)return;assign[eid][iso]={s:a.s,e:a.e,partial:false};locks[k]='set';}
+    else if(v==='off'){delete assign[eid][iso];locks[k]='off';}
+  });
+  const fixedShift=(eid,iso)=>{const l=locks[eid+'|'+iso];return (l==='set'||l==='inh')?(assign[eid][iso]||null):null;};
+  const lockedDay=(eid,iso)=>!!locks[eid+'|'+iso];
+  const sunProt=planSundays(start,end,emps,fixedShift,lockedDay),isProt=(emp,iso)=>!!(sunProt[emp.id]&&sunProt[emp.id].has(iso));
   let week={},lastEnd={},weekDays=[];
+  emps.forEach(e=>{for(let k=1;k<=2;k++){const x=addDays(start,-k),a=ctxShift(e.id,dIso(x),key);if(a){lastEnd[e.id]=dayNo(x)*1440+a.e;break;}}});
   // intervals of [s,e] where a role is already at its maximum on a given day list
   const fullRuns=(list,s,e,r)=>{const out=[];let st=null;for(let x=s;x<=e;x+=15){const f=x<e&&countAt(list,x,r.role)>=r.max;if(f&&st==null)st=x;if(!f&&st!=null){out.push([st,x]);st=null;}}return out;};
   // second pass, once per week: top people up to their contracted weekly hours
@@ -1101,7 +1173,7 @@ function generate(start,end){
       for(const {emp,def} of cands){
         let best=null;
         for(const x of days){
-          const iso=dIso(x);if(assign[emp.id][iso]||isProt(emp,iso))continue;
+          const iso=dIso(x);if(assign[emp.id][iso]||isProt(emp,iso)||lockedDay(emp.id,iso))continue;
           const day=c.days[dow(x)],list=dayList(x),sl=slotsFor(day);
           // candidate windows: the standard slots first, then the same length sliding every 30 min (helps fit rest rules)
           const o0=toMin(day.start);let c0=toMin(day.end);if(c0<=o0)c0+=1440;
@@ -1135,7 +1207,9 @@ function generate(start,end){
     if(dow(d)===0||!Object.keys(week).length){
       fillWeek();
       // holidays worked last week give an extra day off this week
-      const comp={};emps.forEach(e=>comp[e.id]=holSettings().comp===false?0:weekDays.filter(x=>holidayOn(x)&&assign[e.id][dIso(x)]).length);
+      const prevDays=weekDays.length?weekDays:[1,2,3,4,5,6,7].map(i=>addDays(monday(d),-i));
+      const worked=(e,x)=>{const iso=dIso(x);return iso>=dIso(start)?assign[e.id][iso]:ctxShift(e.id,iso,key);};
+      const comp={};emps.forEach(e=>comp[e.id]=holSettings().comp===false?0:prevDays.filter(x=>holidayOn(x)&&worked(e,x)).length);
       week={};weekDays=[];emps.forEach(e=>week[e.id]={h:0,d:0,comp:comp[e.id]||0});
     }
     weekDays.push(new Date(d));
@@ -1143,6 +1217,14 @@ function generate(start,end){
     if(!dayOpen(d))continue;
     const dayAbs=dayNo(d)*1440;
     const busy=new Set(),today=[];
+    emps.forEach(emp=>{
+      if(!lockedDay(emp.id,iso))return;
+      busy.add(emp.id);
+      const a=fixedShift(emp.id,iso);if(!a)return;
+      today.push({emp,s:a.s,e:a.e});
+      const h=(a.e-a.s)/60;week[emp.id].h+=h;week[emp.id].d++;stats[emp.id].total+=h;stats[emp.id].days++;
+      lastEnd[emp.id]=dayAbs+a.e;
+    });
     const maxConc=(list,s,e,role)=>{let m=0;for(let x=s;x<e;x+=15)m=Math.max(m,countAt(list,x,role));return m;};
     const minConc=(list,s,e,role)=>{let m=Infinity;for(let x=s;x<e;x+=15)m=Math.min(m,countAt(list,x,role));return m===Infinity?0:m;};
     const can=(emp,ss,ee)=>{
@@ -1195,7 +1277,7 @@ function generate(start,end){
     });
   }
   fillWeek();
-  return {start:dIso(start),end:dIso(end),assign,gaps:[],empIds:emps.map(e=>e.id)};
+  return {key,start:dIso(start),end:dIso(end),assign,gaps:[],empIds:emps.map(e=>e.id),locks};
 }
 
 function renderIssues(){
@@ -1249,8 +1331,14 @@ function verifySchedule(){
   if(holSettings().comp!==false)emps.forEach(emp=>{
     Object.keys(current.assign[emp.id]||{}).forEach(iso=>{if(holidayOn(iso)){const wk=dIso(addDays(monday(parseIso(iso)),7));const m=compOf[emp.id]=compOf[emp.id]||{};m[wk]=(m[wk]||0)+1;}});
   });
+  // holidays worked in the week before this schedule (neighbouring saved schedule)
+  if(holSettings().comp!==false){
+    const wk0=dIso(monday(parseIso(current.start)));
+    emps.forEach(emp=>{for(let i=1;i<=7;i++){const iso=dIso(addDays(parseIso(wk0),-i));if(iso<current.start&&holidayOn(iso)&&ctxShift(emp.id,iso,current.key)){const m=compOf[emp.id]=compOf[emp.id]||{};m[wk0]=(m[wk0]||0)+1;}}});
+  }
   emps.forEach(emp=>{
     const byWeek={};let prev=null;
+    for(let k=1;k<=2&&prev==null;k++){const x=addDays(parseIso(current.start),-k),a=ctxShift(emp.id,dIso(x),current.key);if(a)prev=dayNo(x)*1440+a.e;}
     Object.keys(current.assign[emp.id]||{}).sort().forEach(iso=>{
       const a=current.assign[emp.id][iso],d=parseIso(iso),wk=dIso(monday(d));
       byWeek[wk]=byWeek[wk]||{h:0,d:0};byWeek[wk].h+=(a.e-a.s)/60;byWeek[wk].d++;
@@ -1288,6 +1376,20 @@ function coverage(iso){
 }
 function showEmpty(msgKey){$('#schedOut').innerHTML=`<div class="card empty">${t(msgKey)}</div>`;$('#schedStats').innerHTML='';}
 let ISS={cell:new Map(),day:new Map(),list:[]};
+const lkC=(eid,iso)=>{const l=current&&current.locks&&current.locks[eid+'|'+iso];return l==='inh'?' inh':l?' lk':'';};
+const manualCount=sc=>Object.values((sc&&sc.locks)||{}).filter(v=>v==='set'||v==='off').length;
+function storeCurrent(){
+  if(!current)return;
+  current.locks=current.locks||{};
+  if(!current.key)current.key='W'+current.start;
+  current.updatedAt=new Date().toISOString();
+  state.schedules=state.schedules||{};state.schedules[current.key]=current;state.currentKey=current.key;
+  delete state.schedule;
+}
+function schedLabel(sc){
+  if(sc.key&&sc.key[0]==='M'){const[y,m]=sc.key.slice(1).split('-').map(Number);const n=t('months')[m-1];return n.charAt(0).toUpperCase()+n.slice(1)+' '+y;}
+  return t('sch.weekOf',{a:dm(parseIso(sc.start)),b:dm(parseIso(sc.end))});
+}
 function buildIssues(){
   const list=verifySchedule(),cell=new Map(),day=new Map();
   list.forEach(i=>{
@@ -1302,7 +1404,7 @@ function compDue(wk){
   if(holSettings().comp===false||!current)return [];
   const prevMon=addDays(parseIso(wk),-7),out=[];
   current.empIds.map(id=>state.employees.find(e=>e.id===id)).filter(Boolean).forEach(emp=>{
-    const hols=[0,1,2,3,4,5,6].map(i=>dIso(addDays(prevMon,i))).filter(iso=>current.assign[emp.id]?.[iso]&&holidayOn(iso));
+    const hols=[0,1,2,3,4,5,6].map(i=>dIso(addDays(prevMon,i))).filter(iso=>shiftAt(emp.id,iso)&&holidayOn(iso));
     if(!hols.length)return;
     const days=[0,1,2,3,4,5,6].map(i=>dIso(addDays(parseIso(wk),i))).filter(iso=>current.assign[emp.id]?.[iso]).length;
     const ok=days<=emp.maxDays-hols.length;
@@ -1321,14 +1423,24 @@ const flagT=(eid,iso,base)=>{const v=ISS.cell.get(eid+'|'+iso);return esc([base,
 const dayFlag=iso=>{const v=ISS.day.get(iso);return v?`<span class="dflag ${v.sev}" title="${esc(v.msgs.join('\n'))}">!</span>`:'';};
 function renderSchedule(){
   if(!current){showEmpty('sch.empty');return;}
-  state.schedule=current;save();buildIssues();
+  storeCurrent();save();buildIssues();
   const start=parseIso(current.start),end=parseIso(current.end);
   const emps=current.empIds.map(id=>state.employees.find(e=>e.id===id)).filter(Boolean);
   const weeks=[];let wk=[];
   for(let d=new Date(start);d<=end;d=addDays(d,1)){if(dow(d)===0&&wk.length){weeks.push(wk);wk=[];}wk.push(new Date(d));}
   if(wk.length)weeks.push(wk);
   const outside=state.employees.filter(e=>!current.empIds.includes(e.id)).sort((a,b)=>a.name.localeCompare(b.name));
-  let html=`<div class="card row noprint" style="padding:12px 18px"><b>${t('sch.inSchedule')}</b> ${emps.length}
+  const nMan=manualCount(current),saved=Object.values(state.schedules||{}).sort((a,b)=>b.start.localeCompare(a.start));
+  let html=`<div class="card noprint sbar" style="padding:12px 18px">
+    <b>${esc(schedLabel(current))}</b> <span class="muted" style="font-size:12px">${dmy(start)} - ${dmy(end)}</span>
+    <span class="pill ${current.closed?'ok':'warn'}">${current.closed?t('st.closed',{d:dmy(new Date(current.closedAt))}):t('st.draft')}</span>
+    ${nMan?`<span class="pill" title="${t('st.manualTip')}">${t('st.manual',{n:nMan})}</span>`:''}
+    <span class="grow"></span>
+    ${saved.length>1?`<select id="savedSel" title="${t('st.saved')}">${saved.map(x=>`<option value="${x.key}" ${x.key===current.key?'selected':''}>${esc(schedLabel(x))}${x.closed?' ✓':''}</option>`).join('')}</select>`:''}
+    <button class="btn sm" id="btnRecalc" ${current.closed?'disabled':''} title="${t('st.recalcTip')}">${t('st.recalc')}</button>
+    <button class="btn sm ${current.closed?'':'primary'}" id="btnClose">${current.closed?t('st.reopen'):t('st.close')}</button>
+  </div>
+  <div class="card row noprint" style="padding:12px 18px"><b>${t('sch.inSchedule')}</b> ${emps.length}
     ${outside.length?`<select id="addSel">${outside.map(e=>`<option value="${e.id}">${esc(e.name)}${e.active?'':` (${t('emp.inactive')})`}</option>`).join('')}</select><button class="btn sm" id="btnAddPerson">${t('sch.addToSchedule')}</button>`:`<span class="muted">${t('sch.allIn')}</span>`}
     <span class="muted" style="margin-left:auto">${t('sch.hint')}</span></div>`;
   if(state.viewMode==='simple'){html+=renderSimple(weeks,emps);}
@@ -1341,9 +1453,9 @@ function renderSchedule(){
       let h=0;html+=`<tr><td class="name"><button class="btn sm danger" style="float:right;padding:0 7px" title="${t('sch.removeFromSchedule')}" data-rmp="${e.id}">×</button><b>${esc(e.name)}</b><br><span class="muted" style="font-size:12px">${esc(e.role||'')}</span></td>`;
       days.forEach(d=>{
         const iso=dIso(d),a=current.assign[e.id][iso],op=dayOpen(d);
-        if(a){h+=(a.e-a.s)/60;html+=`<td class="shift ${a.partial?'partial':''}${flagC(e.id,iso)}" title="${flagT(e.id,iso,'')}" data-e="${e.id}" data-d="${iso}">${fmt(a.s)}<br><span class="e">${fmt(a.e)}</span></td>`;}
+        if(a){h+=(a.e-a.s)/60;html+=`<td class="shift ${a.partial?'partial':''}${flagC(e.id,iso)}${lkC(e.id,iso)}" title="${flagT(e.id,iso,'')}" data-e="${e.id}" data-d="${iso}">${fmt(a.s)}<br><span class="e">${fmt(a.e)}</span></td>`;}
         else if(!op)html+=`<td class="closed">${t('sch.closed')}</td>`;
-        else{const bl=blocksFor(e,d).some(b=>b[0]<-1e8&&b[1]>1e8);html+=bl?`<td class="blocked" data-e="${e.id}" data-d="${iso}" title="${t('sch.unavailTitle')}">${t('sch.unavail')}</td>`:`<td class="off" data-e="${e.id}" data-d="${iso}">${t('sch.off')}</td>`;}
+        else{const bl=blocksFor(e,d).some(b=>b[0]<-1e8&&b[1]>1e8);html+=bl?`<td class="blocked${lkC(e.id,iso)}" data-e="${e.id}" data-d="${iso}" title="${t('sch.unavailTitle')}">${t('sch.unavail')}</td>`:`<td class="off${lkC(e.id,iso)}" data-e="${e.id}" data-d="${iso}">${t('sch.off')}</td>`;}
       });
       html+=`<td><b>${h.toFixed(1).replace('.0','')}</b><span class="muted">/${e.maxHours}</span></td></tr>`;
     });
@@ -1361,11 +1473,23 @@ function renderSchedule(){
   let covOk=0,covN=0;for(let d=new Date(start);d<=end;d=addDays(d,1)){const iso=dIso(d),cv=coverage(iso);if(cv){covN++;const dv=ISS.day.get(iso);if(cv.min>=cv.need&&!(dv&&dv.sev==='bad'))covOk++;}}
   $('#schedStats').innerHTML=`<div class="stats"><div class="stat"><b>${emps.length}</b><span>${t('st.people')}</span></div><div class="stat"><b>${shifts}</b><span>${t('st.shifts')}</span></div><div class="stat"><b>${totalH.toFixed(0)} h</b><span>${t('st.hours')}</span></div><div class="stat"><b>${covOk}/${covN}</b><span>${t('st.cov')}</span></div></div>`;
   $('#schedOut').querySelectorAll('[data-e][data-d]').forEach(td=>td.onclick=()=>openCell(td.dataset.e,td.dataset.d));
+  $('#btnRecalc').onclick=()=>{
+    const n=manualCount(current);
+    confirmBox(t('st.recalcConfirm',{n}),()=>{const k=current,g=generate(parseIso(k.start),parseIso(k.end),{key:k.key,locks:k.locks,assign:k.assign});
+      g.empIds=[...new Set(k.empIds.filter(id=>state.employees.some(e=>e.id===id)).concat(g.empIds))];g.empIds.forEach(id=>g.assign[id]=g.assign[id]||{});
+      current=g;renderSchedule();toast(t('st.recalcDone',{n}));});
+  };
+  $('#btnClose').onclick=()=>{
+    if(current.closed)confirmBox(t('st.reopenConfirm'),()=>{current.closed=false;current.closedAt=null;renderSchedule();toast(t('st.reopened'));});
+    else confirmBox(t('st.closeConfirm'),()=>{current.closed=true;current.closedAt=new Date().toISOString();renderSchedule();toast(t('st.closedToast'));});
+  };
+  const ss=$('#savedSel');if(ss)ss.onchange=()=>{current=state.schedules[ss.value];renderSchedule();};
   const ab=$('#btnAddPerson');
-  if(ab)ab.onclick=()=>{const id=$('#addSel').value;current.empIds.push(id);current.assign[id]=current.assign[id]||{};renderSchedule();toast(t('t.added'));};
+  if(ab)ab.onclick=()=>{if(current.closed){toast(t('st.isClosed'));return;}const id=$('#addSel').value;current.empIds.push(id);current.assign[id]=current.assign[id]||{};renderSchedule();toast(t('t.added'));};
   $('#schedOut').querySelectorAll('[data-rmp]').forEach(b=>b.onclick=ev=>{ev.stopPropagation();
     const e=state.employees.find(x=>x.id===b.dataset.rmp);
-    confirmBox(t('t.confirmRemovePerson',{n:e.name}),()=>{current.empIds=current.empIds.filter(x=>x!==e.id);delete current.assign[e.id];renderSchedule();toast(t('t.removedPerson'));});});
+    if(current.closed){toast(t('st.isClosed'));return;}
+    confirmBox(t('t.confirmRemovePerson',{n:e.name}),()=>{current.empIds=current.empIds.filter(x=>x!==e.id);delete current.assign[e.id];Object.keys(current.locks||{}).forEach(k=>{if(k.startsWith(e.id+'|'))delete current.locks[k];});renderSchedule();toast(t('t.removedPerson'));});});
 }
 
 /* simplified view, in the printed-sheet format */
@@ -1399,7 +1523,7 @@ function renderSimple(weeks,emps){
         h+=`<tr>${r===0?`<td class="per" rowspan="${n}">${p}</td>`:''}`;
         cols.forEach(c=>{
           const it=c.per[pi][r];
-          h+=c.closed?'<td class="closed"></td>':it?`<td><span class="nm ${it.a.partial?'partial':''}${flagC(it.e.id,c.iso)}" data-e="${it.e.id}" data-d="${c.iso}" title="${flagT(it.e.id,c.iso,it.e.name+': '+fmt(it.a.s)+' - '+fmt(it.a.e))}">${esc(firstName(it.e.name))}</span></td>`:'<td></td>';
+          h+=c.closed?'<td class="closed"></td>':it?`<td><span class="nm ${it.a.partial?'partial':''}${flagC(it.e.id,c.iso)}${lkC(it.e.id,c.iso)}" data-e="${it.e.id}" data-d="${c.iso}" title="${flagT(it.e.id,c.iso,it.e.name+': '+fmt(it.a.s)+' - '+fmt(it.a.e))}">${esc(firstName(it.e.name))}</span></td>`:'<td></td>';
         });
         h+='</tr>';
       }
@@ -1432,11 +1556,11 @@ function renderBoard(weeks,emps){
         l.sort((x,y)=>x.a.s-y.a.s||x.e.name.localeCompare(y.e.name));
         h+=`<div class="bper">${cap(PER[pi])}</div>`;
         l.forEach(({e,a})=>{const hu=hueOf(e.id);
-          h+=`<div class="bcard ${a.partial?'partial':''}${flagC(e.id,iso)}" style="--h:${hu}" data-e="${e.id}" data-d="${iso}" title="${flagT(e.id,iso,e.name+(e.role?' · '+e.role:''))}">
+          h+=`<div class="bcard ${a.partial?'partial':''}${flagC(e.id,iso)}${lkC(e.id,iso)}" style="--h:${hu}" data-e="${e.id}" data-d="${iso}" title="${flagT(e.id,iso,e.name+(e.role?' · '+e.role:''))}">
             <div class="av" style="--h:${hu}">${esc(initials(e.name))}</div>
             <div style="min-width:0"><div class="bn">${esc(firstName(e.name))}</div><div class="bt">${fmt(a.s)}-${fmt(a.e)}${a.partial?' <b>●</b>':''}</div></div></div>`;});
       });
-      if(off.length)h+=`<div class="boff"><div class="bper">${t('board.off')} · ${off.length}</div><div class="avs">${off.map(e=>`<div class="av" style="--h:${hueOf(e.id)}" data-e="${e.id}" data-d="${iso}" title="${esc(t('simple.clickToSchedule',{n:e.name}))}">${esc(initials(e.name))}</div>`).join('')}</div></div>`;
+      if(off.length)h+=`<div class="boff"><div class="bper">${t('board.off')} · ${off.length}</div><div class="avs">${off.map(e=>`<div class="av${lkC(e.id,iso)}" style="--h:${hueOf(e.id)}" data-e="${e.id}" data-d="${iso}" title="${esc(t('simple.clickToSchedule',{n:e.name}))}">${esc(initials(e.name))}</div>`).join('')}</div></div>`;
       h+='</div>';
     });
     h+='</div></div>';
@@ -1447,7 +1571,11 @@ function renderBoard(weeks,emps){
 /* ---------- manual cell editing ---------- */
 let cellCtx=null;
 function openCell(eid,iso){
+  if(current.closed){toast(t('st.isClosed'));return;}
   const a=current.assign[eid][iso],d=parseIso(iso),day=state.company.days[dow(d)];
+  const lock=(current.locks||{})[eid+'|'+iso],src=lock==='inh'?otherSchedFor(iso,current.key):null;
+  $('#cellLock').textContent=lock==='inh'?t('cell.inh',{s:src?schedLabel(src):''}):lock?t('cell.pinned'):'';
+  $('#cUnlock').style.display=lock?'':'none';
   cellCtx={eid,iso};
   $('#cellTitle').textContent=`${DF()[dow(d)]} ${dm(d)}`;
   $('#cPerson').innerHTML=current.empIds.map(id=>state.employees.find(x=>x.id===id)).filter(Boolean).sort((x,y)=>x.name.localeCompare(y.name)).map(p=>{
@@ -1473,7 +1601,9 @@ function warnCell(){
   $('#cellWarn').innerHTML=h;
 }
 $('#cCancel').onclick=()=>$('#cellModal').classList.remove('open');
-$('#cClear').onclick=()=>{delete current.assign[cellCtx.eid][cellCtx.iso];$('#cellModal').classList.remove('open');renderSchedule();toast(t('t.removed'));};
+const setLock=(eid,iso,v)=>{current.locks=current.locks||{};current.locks[eid+'|'+iso]=v;};
+$('#cUnlock').onclick=()=>{delete current.locks[cellCtx.eid+'|'+cellCtx.iso];$('#cellModal').classList.remove('open');renderSchedule();toast(t('cell.unlocked'));};
+$('#cClear').onclick=()=>{delete current.assign[cellCtx.eid][cellCtx.iso];setLock(cellCtx.eid,cellCtx.iso,'off');$('#cellModal').classList.remove('open');renderSchedule();toast(t('t.removed'));};
 $('#cSave').onclick=()=>{
   const ns=normTime($('#cStart').value),ne=normTime($('#cEnd').value);
   if(!ns||!ne){toast(t('tm.invalid'));return;}
@@ -1485,12 +1615,12 @@ $('#cSave').onclick=()=>{
   if(to!==eid){
     const other=current.assign[to][iso],mine=current.assign[eid][iso];
     delete current.assign[eid][iso];
-    if(other&&mine){current.assign[eid][iso]=other;msg=t('t.swapped');}
-    else msg=t('t.moved',{n:emp.name});
+    if(other&&mine){current.assign[eid][iso]=other;setLock(eid,iso,'set');msg=t('t.swapped');}
+    else{setLock(eid,iso,'off');msg=t('t.moved',{n:emp.name});}
     const o=state.employees.find(x=>x.id===eid);
     if(current.assign[eid][iso]&&overlaps(other.s,other.e,blocksFor(o,d)))msg+=t('t.conflictOther',{n:o.name});
   }
-  current.assign[to][iso]={s,e,partial:false};
+  current.assign[to][iso]={s,e,partial:false};setLock(to,iso,'set');
   $('#cellModal').classList.remove('open');renderSchedule();
   if(overlaps(s,e,blocksFor(emp,d)))msg+=t('t.conflict',{n:emp.name});
   if(weekHours(to,iso)>emp.maxHours)msg+=t('t.overLimit');
@@ -1502,13 +1632,39 @@ $('#viewMode').onchange=()=>{state.viewMode=$('#viewMode').value;save();renderSc
 $('#mode').onchange=()=>{const m=$('#mode').value==='month';$('#f-week').style.display=m?'none':'';$('#f-month').style.display=m?'':'none';};
 $('#weekDate').value=dIso(monday(addDays(new Date(),7)));
 $('#monthDate').value=(()=>{const d=new Date();d.setMonth(d.getMonth()+1);return d.getFullYear()+'-'+p2(d.getMonth()+1);})();
+// choice dialog: list of {label, sub, cls, fn}
+function choiceBox(title,text,opts){
+  $('#chTitle').textContent=title;$('#chText').textContent=text;
+  $('#chBtns').innerHTML=opts.map((o,i)=>`<button class="btn ${o.cls||''}" data-ch="${i}" ${o.disabled?'disabled':''}>${esc(o.label)}${o.sub?`<small>${esc(o.sub)}</small>`:''}</button>`).join('');
+  $('#chBtns').querySelectorAll('[data-ch]').forEach(b=>b.onclick=()=>{$('#choiceModal').classList.remove('open');opts[+b.dataset.ch].fn();});
+  $('#choiceModal').classList.add('open');
+}
+$('#chCancel').onclick=()=>$('#choiceModal').classList.remove('open');
 $('#btnGen').onclick=()=>{
   if(!state.employees.some(e=>e.active)){toast(t('t.needEmp'));return;}
-  let s,e;
-  if($('#mode').value==='week'){if(!$('#weekDate').value)return;s=monday(parseIso($('#weekDate').value));e=addDays(s,6);}
-  else{if(!$('#monthDate').value)return;const[y,m]=$('#monthDate').value.split('-').map(Number);s=new Date(y,m-1,1);e=new Date(y,m,0);}
+  let s,e,key;
+  if($('#mode').value==='week'){if(!$('#weekDate').value)return;s=monday(parseIso($('#weekDate').value));e=addDays(s,6);key='W'+dIso(s);}
+  else{if(!$('#monthDate').value)return;const[y,m]=$('#monthDate').value.split('-').map(Number);
+    // month in complete weeks, Monday to Sunday
+    s=monday(new Date(y,m-1,1));e=addDays(monday(new Date(y,m,0)),6);key='M'+y+'-'+p2(m);}
   [s.getFullYear(),e.getFullYear()].forEach(autoFetchHolidays);
-  current=generate(s,e);renderSchedule();toast(t('t.generated'));
+  const ex=(state.schedules||{})[key];
+  const run=keep=>{
+    const g=generate(s,e,{key,locks:keep&&ex?ex.locks:{},assign:keep&&ex?ex.assign:null});
+    current=g;renderSchedule();toast(t(keep?'st.recalcDone':'t.generated',{n:manualCount(ex)}));
+  };
+  if(!ex){run(false);return;}
+  const n=manualCount(ex),lbl=schedLabel(ex);
+  if(ex.closed){
+    choiceBox(t('ch.title',{l:lbl}),t('ch.closedText',{d:dmy(new Date(ex.closedAt))}),[
+      {label:t('ch.open'),sub:t('ch.openSub'),cls:'primary',fn:()=>{current=ex;renderSchedule();}}]);
+    return;
+  }
+  choiceBox(t('ch.title',{l:lbl}),t('ch.text',{d:dmy(new Date(ex.updatedAt||Date.now())),n}),[
+    {label:t('ch.open'),sub:t('ch.openSub'),cls:'primary',fn:()=>{current=ex;renderSchedule();}},
+    {label:t('ch.recalc'),sub:t('ch.recalcSub',{n}),fn:()=>run(true)},
+    {label:t('ch.fresh'),sub:t('ch.freshSub',{n}),cls:'danger',fn:()=>confirmBox(t('ch.freshConfirm',{n}),()=>run(false))}
+  ]);
 };
 $('#btnCsv').onclick=async()=>{
   if(!current){toast(t('t.needGen'));return;}
@@ -1726,9 +1882,17 @@ $('#btnExport').onclick=()=>{$('#jsonBox').value=JSON.stringify(state,null,2);to
 $('#btnCopyJson').onclick=()=>copyText(JSON.stringify(state,null,2),$('#jsonBox'));
 $('#btnImport').onclick=()=>{
   try{const d=JSON.parse($('#jsonBox').value);if(!validCompany(d.company)||!Array.isArray(d.employees))throw 0;
-    confirmBox(t('data.confirmImport'),()=>{state=d;save();current=state.schedule||null;renderAll();if(!current)showEmpty('data.importedGen');toast(t('data.imported'));});
+    confirmBox(t('data.confirmImport'),()=>{state=d;initSchedules();save();renderAll();if(!current)showEmpty('data.importedGen');toast(t('data.imported'));});
   }catch(e){toast(t('data.invalid'));}
 };
+// saved schedules: migrate the single schedule of older versions and open the last one used
+function initSchedules(){
+  if(state.schedule&&!state.schedules){const sc=state.schedule;sc.key=sc.key||('W'+sc.start);sc.locks=sc.locks||{};state.schedules={[sc.key]:sc};state.currentKey=sc.key;}
+  delete state.schedule;
+  state.schedules=state.schedules||{};
+  current=state.schedules[state.currentKey]||null;
+  if(current){current.locks=current.locks||{};current.empIds=current.empIds.filter(id=>state.employees.some(e=>e.id===id));}
+}
 $('#btnReset').onclick=()=>confirmBox(t('data.confirmReset'),()=>{state=seed();save();current=null;renderAll();toast(t('data.resetDone'));});
 
 document.querySelectorAll('.modal-bg').forEach(m=>m.addEventListener('click',e=>{if(e.target===m)m.classList.remove('open');}));
@@ -1810,7 +1974,7 @@ $('#langSel').onchange=()=>{lang=$('#langSel').value;try{localStorage.setItem(LA
 
 function renderAll(){renderCompany();renderEmployees();renderSchedule();}
 load();
-if(state.schedule){current=state.schedule;current.empIds=current.empIds.filter(id=>state.employees.some(e=>e.id===id));}
+initSchedules();
 $('#viewMode').value=state.viewMode||'detail';
 applyI18n();renderAll();
 </script>

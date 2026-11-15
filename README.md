@@ -22,6 +22,8 @@ A web app for building weekly and monthly work schedules.
 - **Holidays:** Brazilian national holidays are calculated automatically every year (including Good Friday), with optional days (Carnival, Corpus Christi) and custom state/city holidays. Each holiday can be marked as closed. With internet access, the official list is downloaded from BrasilAPI (fallback: Nager.Date); offline, the built-in calculation is used.
 - **Compensatory day off:** whoever works on a holiday gets one extra day off in the following week (Monday to Sunday), with that week's hours goal reduced proportionally. The schedule check flags it if a manual change removes that day off.
 - **Schedule check:** coverage, role minimum/maximum, restrictions, weekly limits and rest are verified continuously, including after manual changes. Conflicts are allowed but flagged on screen (cell outline, day marker and a summary panel) and never printed.
+- **Saved schedules:** every generated month or week is saved with its manual changes. Monthly schedules use complete weeks (Monday to Sunday); the week shared with a neighbouring saved schedule is taken from it, so holidays worked, compensatory days off and rest carry over from one month to the next.
+- **Generate, recalculate, close:** if the period already has a schedule, Generate asks whether to open it, recalculate keeping manual changes, or start from scratch. Recalculate redoes only the automatic part. Closing a schedule makes it final (read-only until reopened) and the reference for the following ones.
 - **Manual adjustments:** change the person on a shift (swapping automatically if the other person already works that day), change times, schedule someone on a day off, add or remove people from the schedule. Conflicts raise a warning.
 - **Views:**
   - Detailed: person by day, with hours and coverage.
@@ -43,8 +45,7 @@ Open `index.html` in a browser. It is a single self-contained file (the Cube4Cod
 ### Current limitations
 
 - Data lives only in the browser of whoever uses it; it is not shared between people or devices.
-- Generating the schedule again discards manual adjustments made to the previous one.
-- In monthly mode, the first and last weeks are cut at the month boundary.
+- Manual changes are kept unless you explicitly choose to generate from scratch.
 
 ---
 
@@ -66,6 +67,8 @@ Aplicação web para montar escalas de trabalho semanais e mensais.
 - **Feriados:** feriados nacionais calculados automaticamente todo ano (inclusive Paixão de Cristo), com pontos facultativos opcionais (Carnaval, Corpus Christi) e feriados estaduais e municipais cadastráveis. Cada feriado pode ser marcado como empresa fechada. Com internet, a lista oficial é baixada da BrasilAPI (reserva: Nager.Date); sem internet, vale o cálculo automático.
 - **Folga compensatória:** quem trabalha no feriado ganha uma folga a mais na semana seguinte (segunda a domingo), com a meta de horas da semana reduzida na mesma proporção. A verificação avisa se um ajuste manual tirar essa folga.
 - **Verificação da escala:** cobertura, mínimo e máximo por cargo, restrições, limites semanais e descanso são verificados o tempo todo, inclusive após ajustes manuais. Conflitos são permitidos, mas sinalizados na tela (borda na célula, marcador no dia e painel de resumo) e nunca saem na impressão.
+- **Escalas salvas:** cada mês ou semana gerada fica salva com seus ajustes manuais. A escala mensal usa semanas completas (segunda a domingo); a semana compartilhada com uma escala vizinha salva vem dela, então feriados trabalhados, folgas compensatórias e descanso passam de um mês para o outro.
+- **Gerar, recalcular, fechar:** se o período já tem escala, Gerar pergunta se é para abrir a salva, recalcular mantendo os ajustes manuais ou gerar do zero. Recalcular refaz só a parte automática. Fechar deixa a escala definitiva (sem alterações até reabrir) e referência para as próximas.
 - **Ajuste manual:** trocar a pessoa de um turno (com troca automática se a outra já tiver turno no dia), mudar horário, escalar alguém na folga, adicionar ou tirar pessoas da escala. Conflitos geram aviso.
 - **Visualizações:**
   - Detalhada: pessoa por dia, com horas e cobertura.
@@ -87,5 +90,4 @@ Abra `index.html` no navegador. É um arquivo único e autossuficiente (o símbo
 ### Limitações atuais
 
 - Os dados ficam só no navegador de quem usa; não são compartilhados entre pessoas ou aparelhos.
-- Gerar a escala de novo descarta os ajustes manuais da escala anterior.
-- No modo mensal, a primeira e a última semana aparecem cortadas no limite do mês.
+- Os ajustes manuais só se perdem se você escolher explicitamente gerar do zero.
