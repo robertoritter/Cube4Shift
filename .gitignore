@@ -136,3 +136,7 @@ CMakeUserPresets.json
 
 # Padrões Cube4Code: mantidos só localmente, fora do repositório
 docs/standards/
+
+# Instruções para agentes: mantidas só localmente
+CLAUDE.md
+AGENTS.md
