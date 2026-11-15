@@ -1,4 +1,135 @@
-.DS_Store
-Claude outputs/
+# =====================================================================
+# Cube4Code .gitignore base (genérico)
+# Regra: entra o que é fonte e reproduz o projeto; fica fora o que é
+# segredo, dado real, gerado, local da máquina ou grande demais.
+# Os blocos de stack no final são opcionais: apague os que não usar.
+# =====================================================================
+
+# --- Configuração e segredos ---------------------------------------
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+id_rsa*
+id_ed25519*
+*credentials*.json
+*service-account*.json
+secrets.json
+secrets.yaml
+secrets.yml
+*.secrets
+.npmrc
+.pypirc
+
+# --- Bancos de dados ------------------------------------------------
+# Entram: schemas, migrations, seeds fictícios.
+# Ficam fora: dumps, backups, bancos locais e volumes.
+*.dump
+*.backup
+*.bak
+*.sql.gz
+*.sql.zip
+dumps/
+backups/
+*.sqlite
+*.sqlite3
+*.db
+*.db-journal
+*.mdb
+*.accdb
+volumes/
+docker-data/
+pgdata/
+
+# --- Dados ------------------------------------------------------------
+# Dados reais ficam fora; amostras fictícias vão em samples/ ou fixtures/.
+data/
+exports/
+imports/
+!samples/**
+!**/fixtures/**
+
+# --- Testes (saídas geradas) ----------------------------------------
+# Entram: código de teste e fixtures. Ficam fora: resultados.
+test-results/
+test-output/
+test-reports/
+coverage/
+.coverage
+htmlcov/
+.nyc_output/
+playwright-report/
+*.trx
+junit*.xml
+
+# --- Dependências ----------------------------------------------------
+node_modules/
+.venv/
+venv/
+
+# --- Build e caches ---------------------------------------------------
+dist/
+build/
+build-*/
+out/
+.cache/
+*.o
+*.obj
+
+# --- Logs, temporários e entregas -----------------------------------
+*.log
+logs/
+*.tmp
+tmp/
+temp/
 *.bundle
 *.zip
+Claude outputs/
+
+# --- Sistema operacional ----------------------------------------------
+.DS_Store
+._*
+Thumbs.db
+desktop.ini
+
+# --- Editores e IDEs --------------------------------------------------
+.idea/
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+*.swp
+*.swo
+*~
+*.suo
+*.user
+
+# =====================================================================
+# Blocos opcionais por stack
+# =====================================================================
+
+# --- Python ---
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+*.egg-info/
+
+# --- Node / web ---
+.next/
+.nuxt/
+npm-debug.log*
+yarn-error.log*
+
+# --- .NET ---
+bin/
+obj/
+
+# --- C++ / Qt / CMake ---
+cmake-build-*/
+CMakeUserPresets.json
+*.qmlc
+*.jsc
