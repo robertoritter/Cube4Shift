@@ -133,3 +133,6 @@ cmake-build-*/
 CMakeUserPresets.json
 *.qmlc
 *.jsc
+
+# Padrões Cube4Code: mantidos só localmente, fora do repositório
+docs/standards/
