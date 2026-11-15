@@ -20,13 +20,18 @@ A web app for building weekly and monthly work schedules.
   - Detailed: person by day, with hours and coverage.
   - Simplified (print): Morning, Midday, Afternoon and Day off for each week, in the printed-sheet format.
   - Board (cards): weekly columns with color-coded cards per person and coverage per day.
+- **Printing:** Print button on the schedule, with A4 or Letter paper and landscape or portrait orientation. "Fit to one page" (default) compacts the layout and scales it so the whole period, even a full month, fits one sheet; the brand and print date go in a tiny footer. Menus and buttons are left out. Inside the published artifact (where the browser blocks printing) it saves a printable HTML file that prints itself when opened.
 - **Language:** English and Portuguese (BR), switchable from the header.
 - **Theme:** button in the header switches between light and dark (the choice is saved; without a choice it follows the system).
-- **Data:** saved in the browser (localStorage), with JSON backup and import, and CSV copy of the schedule.
+- **Data export/import:**
+  - Employees: CSV (opens in Excel, UTF-8) and JSON, with a template. Import from file or pasted text, with a preview and two modes: merge (update by name, add new) or replace the whole list. Rows with errors are skipped so nobody loses data silently.
+  - Company: opening hours, coverage and rules as JSON.
+  - Full backup: everything as JSON.
+  - Data lives in the browser (localStorage); the schedule can also be copied as CSV.
 
 ### How to use
 
-Open `index.html` in a browser, keeping `cube4code.png` in the same folder. No build, server or login.
+Open `index.html` in a browser. It is a single self-contained file (the Cube4Code symbol is embedded); `cube4code.png` is kept in the repository as the canonical asset. No build, server or login.
 
 ### Current limitations
 
@@ -52,13 +57,18 @@ Aplicação web para montar escalas de trabalho semanais e mensais.
   - Detalhada: pessoa por dia, com horas e cobertura.
   - Simplificada (impressão): Manhã, Intermediário, Tarde e Folga por semana, no formato da planilha impressa.
   - Quadro (cartões): colunas por dia com cartões coloridos por pessoa e cobertura de cada dia.
+- **Impressão:** botão Imprimir na escala, com papel A4 ou Letter e orientação paisagem ou retrato. "Caber em uma página" (padrão) compacta o layout e ajusta a escala para o período inteiro, inclusive o mês, caber numa folha; marca e data de impressão vão num rodapé minúsculo. Menus e botões ficam de fora. Dentro do artefato publicado (onde o navegador bloqueia a impressão), salva um arquivo HTML que imprime sozinho ao ser aberto.
 - **Idioma:** inglês e português (BR), com menu no cabeçalho.
 - **Tema:** botão no topo para alternar entre claro e escuro (a escolha fica salva; sem escolha, segue o sistema).
-- **Dados:** salvos no navegador (localStorage), com backup e importação em JSON e cópia da escala em CSV.
+- **Exportação/importação de dados:**
+  - Funcionários: CSV (abre no Excel, UTF-8) e JSON, com modelo. Importação por arquivo ou texto colado, com pré-visualização e dois modos: mesclar (atualiza pelo nome, inclui novos) ou substituir a lista inteira. Linhas com erro não entram, para ninguém perder dados sem perceber.
+  - Empresa: horários, cobertura e regras em JSON.
+  - Backup completo: tudo em JSON.
+  - Os dados ficam no navegador (localStorage); a escala também pode ser copiada em CSV.
 
 ### Como usar
 
-Abra `index.html` no navegador, mantendo `cube4code.png` na mesma pasta. Não há build, servidor nem login.
+Abra `index.html` no navegador. É um arquivo único e autossuficiente (o símbolo Cube4Code está embutido); `cube4code.png` fica no repositório como ativo canônico. Não há build, servidor nem login.
 
 ### Limitações atuais
 
