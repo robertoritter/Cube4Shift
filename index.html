@@ -1,37 +1,53 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Cube4Shift</title>
 <script>try{const t=localStorage.getItem("cube4shift.theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+<link rel="icon" type="image/png" href="cube4code.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
 <style>
 :root{
   --bg:#f5f6f8; --panel:#fff; --ink:#1b1f27; --muted:#667085; --line:#e4e7ec;
   --accent:#2f5bea; --accent-soft:#e8eeff; --ok:#12805c; --ok-soft:#e3f6ee;
   --warn:#b54708; --warn-soft:#fef0e1; --bad:#c0322b; --bad-soft:#fdecea;
+  --brand-ink:#0B2033; --violet:#8523D1;
   --radius:10px;
 }
 @media (prefers-color-scheme: dark){
   :root:not([data-theme=light]){--bg:#12151b;--panel:#1a1e26;--ink:#e8ebf1;--muted:#98a2b3;--line:#2b313c;
-  --accent:#6f8fff;--accent-soft:#232c48;--ok:#4cc79a;--ok-soft:#163328;--warn:#f5a25d;--warn-soft:#3a2a18;--bad:#f2766d;--bad-soft:#3b1d1b;}
+  --accent:#6f8fff;--accent-soft:#232c48;--ok:#4cc79a;--ok-soft:#163328;--warn:#f5a25d;--warn-soft:#3a2a18;--bad:#f2766d;--bad-soft:#3b1d1b;
+  --brand-ink:#F4F6FA;--violet:#A889FF;}
 }
 :root[data-theme=dark]{--bg:#12151b;--panel:#1a1e26;--ink:#e8ebf1;--muted:#98a2b3;--line:#2b313c;
-  --accent:#6f8fff;--accent-soft:#232c48;--ok:#4cc79a;--ok-soft:#163328;--warn:#f5a25d;--warn-soft:#3a2a18;--bad:#f2766d;--bad-soft:#3b1d1b;}
+  --accent:#6f8fff;--accent-soft:#232c48;--ok:#4cc79a;--ok-soft:#163328;--warn:#f5a25d;--warn-soft:#3a2a18;--bad:#f2766d;--bad-soft:#3b1d1b;
+  --brand-ink:#F4F6FA;--violet:#A889FF;}
 :root{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
 @media (prefers-color-scheme: dark){:root:not([data-theme=light]){color-scheme:dark}}
-.theme-btn{border:1px solid var(--line);background:var(--panel);color:var(--ink);border-radius:8px;width:36px;height:36px;cursor:pointer;display:grid;place-items:center;font-size:16px}
-.theme-btn:hover{border-color:var(--accent)}
 *{box-sizing:border-box}
 body{margin:0;font-family:Inter,system-ui,sans-serif;background:var(--bg);color:var(--ink);font-size:14px;line-height:1.45}
-header{display:flex;align-items:center;gap:16px;padding:14px 24px;background:var(--panel);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:5;flex-wrap:wrap}
-.brand{font-weight:700;font-size:17px;letter-spacing:-.01em;display:flex;align-items:center;gap:8px}
-.brand .cube{width:22px;height:22px;border-radius:5px;background:var(--accent);display:grid;place-items:center;color:#fff;font-size:12px}
+header{display:flex;align-items:center;gap:16px;padding:12px 24px;background:var(--panel);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:5;flex-wrap:wrap}
+
+/* marca: símbolo à esquerda, nome em cima, assinatura embaixo */
+.brand{display:flex;align-items:center;gap:11px}
+.brand img{height:38px;width:auto;display:block}
+.brand-text{display:flex;flex-direction:column;line-height:1.1}
+.wordmark{font-family:Manrope,Inter,sans-serif;font-weight:700;font-size:19px;letter-spacing:-.04em;color:var(--brand-ink)}
+.four{color:var(--violet);font-weight:800;font-size:1.1em;margin:0 1px}
+.signature{font-family:Manrope,Inter,sans-serif;font-weight:600;font-size:11.5px;letter-spacing:-.01em;color:var(--muted);text-decoration:none;margin-top:2px}
+.signature .four{font-size:1em}
+.signature:hover{text-decoration:underline}
+@media (max-width:640px){.brand-text{display:none}}
+
 nav{display:flex;gap:4px;margin-left:auto;flex-wrap:wrap}
 nav button{border:0;background:transparent;color:var(--muted);padding:8px 14px;border-radius:8px;font:inherit;font-weight:500;cursor:pointer}
 nav button.active{background:var(--accent-soft);color:var(--accent)}
+.tools{display:flex;gap:8px;align-items:center}
+.theme-btn{border:1px solid var(--line);background:var(--panel);color:var(--ink);border-radius:8px;width:36px;height:36px;cursor:pointer;display:grid;place-items:center;font-size:16px}
+.theme-btn:hover{border-color:var(--accent)}
+#langSel{height:36px}
 main{max-width:1400px;margin:0 auto;padding:24px}
 .view{display:none}.view.active{display:block}
 h2{font-size:20px;margin:0 0 4px}
@@ -94,7 +110,32 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--accent-soft);bor
 .simple tr.folga td.per{color:var(--ink)}
 .simple td.closed{background:var(--bg);color:var(--muted)}
 .simple-wrap{overflow-x:auto;background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:14px;margin-bottom:18px}
-.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--ink);color:var(--panel);padding:10px 18px;border-radius:8px;opacity:0;transition:opacity .2s;pointer-events:none;z-index:30}
+.board-week{margin-bottom:26px}
+.board-week h4{margin:0 0 10px;font-size:14px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
+.board{display:grid;grid-template-columns:repeat(7,minmax(150px,1fr));gap:10px;overflow-x:auto;padding-bottom:4px}
+.bcol{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:10px;display:flex;flex-direction:column;gap:8px;min-height:160px}
+.bcol.closed{background:transparent;border-style:dashed;opacity:.55}
+.bcol.today{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent)}
+.bhead{display:flex;justify-content:space-between;align-items:flex-start;gap:6px}
+.bhead .dn{font-weight:700;font-size:13px}
+.bhead .dd{font-size:22px;font-weight:700;line-height:1;letter-spacing:-.02em}
+.bhead .pill{margin:0}
+.bper{font-size:10.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-top:4px}
+.bcard{--h:220;display:flex;gap:8px;align-items:center;padding:7px 8px;border-radius:9px;cursor:pointer;
+  background:hsl(var(--h) 85% 95%);border-left:3px solid hsl(var(--h) 60% 50%);transition:transform .08s}
+.bcard:hover{transform:translateY(-1px)}
+.bcard.partial{border-left-style:dashed}
+.av{--h:220;width:28px;height:28px;border-radius:50%;flex:none;display:grid;place-items:center;font-size:11px;font-weight:700;color:#fff;background:hsl(var(--h) 55% 50%)}
+.bcard .bn{font-weight:600;font-size:12.5px;line-height:1.15;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.bcard .bt{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--muted)}
+.bcard .bt b{color:var(--warn);font-family:Inter,sans-serif}
+.boff{margin-top:auto;border-top:1px solid var(--line);padding-top:8px}
+.boff .avs{display:flex;flex-wrap:wrap;gap:4px;margin-top:4px}
+.boff .av{width:24px;height:24px;font-size:10px;cursor:pointer;opacity:.45;filter:saturate(.4)}
+.boff .av:hover{opacity:1;filter:none}
+@media (prefers-color-scheme: dark){:root:not([data-theme=light]) .bcard{background:hsl(var(--h) 30% 20%)}}
+:root[data-theme=dark] .bcard{background:hsl(var(--h) 30% 20%)}
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--ink);color:var(--panel);padding:10px 18px;border-radius:8px;opacity:0;transition:opacity .2s;pointer-events:none;z-index:30;max-width:90vw;text-align:center}
 .toast.show{opacity:1}
 .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-bottom:18px}
 .stat{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:14px}
@@ -106,132 +147,143 @@ textarea{width:100%;min-height:160px;font-family:'JetBrains Mono',monospace;font
 </head>
 <body>
 <header>
-  <div class="brand"><div class="cube">C4</div>Cube4Shift</div>
-  <span class="muted">Escalas de trabalho</span>
+  <div class="brand">
+    <img src="cube4code.png" alt="Cube4Code">
+    <div class="brand-text">
+      <span class="wordmark">Cube<span class="four">4</span>Shift</span>
+      <a class="signature" href="https://cube4code.com/" target="_blank" rel="noopener">by Cube<span class="four">4</span>Code.com</a>
+    </div>
+  </div>
   <nav id="nav">
-    <button data-view="escala" class="active">Escala</button>
-    <button data-view="funcionarios">Funcionários</button>
-    <button data-view="empresa">Empresa</button>
-    <button data-view="dados">Dados</button>
+    <button data-view="escala" class="active" data-i18n="nav.schedule"></button>
+    <button data-view="funcionarios" data-i18n="nav.employees"></button>
+    <button data-view="empresa" data-i18n="nav.company"></button>
+    <button data-view="dados" data-i18n="nav.data"></button>
   </nav>
-  <button class="theme-btn" id="themeBtn" title="Alternar tema claro/escuro"></button>
+  <div class="tools">
+    <select id="langSel" data-i18n-title="lang.title">
+      <option value="en">English</option>
+      <option value="pt">Português (BR)</option>
+    </select>
+    <button class="theme-btn" id="themeBtn"></button>
+  </div>
 </header>
 
 <main>
-<!-- ESCALA -->
+<!-- SCHEDULE -->
 <section class="view active" id="v-escala">
-  <h2>Gerar escala</h2>
-  <p class="sub">Escolha o período. A escala respeita horário da empresa, cobertura mínima, restrições de cada pessoa, limite semanal e descanso entre jornadas.</p>
+  <h2 data-i18n="sch.title"></h2>
+  <p class="sub" data-i18n="sch.sub"></p>
   <div class="card">
     <div class="row">
-      <div class="field"><label>Período</label>
-        <select id="mode"><option value="week">Semanal</option><option value="month">Mensal</option></select></div>
-      <div class="field" id="f-week"><label>Semana (qualquer dia dela)</label><input type="date" id="weekDate"></div>
-      <div class="field" id="f-month" style="display:none"><label>Mês</label><input type="month" id="monthDate"></div>
-      <div class="field"><label>&nbsp;</label><button class="btn primary" id="btnGen">Gerar escala</button></div>
-      <div class="field"><label>Visualização</label>
-        <select id="viewMode"><option value="detail">Detalhada (por pessoa)</option><option value="simple">Simplificada (por período)</option></select></div>
-      <div class="field"><label>&nbsp;</label><button class="btn" id="btnCsv">Copiar CSV</button></div>
+      <div class="field"><label data-i18n="sch.period"></label>
+        <select id="mode"><option value="week" data-i18n="sch.weekly"></option><option value="month" data-i18n="sch.monthly"></option></select></div>
+      <div class="field" id="f-week"><label data-i18n="sch.weekPick"></label><input type="date" id="weekDate"></div>
+      <div class="field" id="f-month" style="display:none"><label data-i18n="sch.month"></label><input type="month" id="monthDate"></div>
+      <div class="field"><label>&nbsp;</label><button class="btn primary" id="btnGen" data-i18n="sch.generate"></button></div>
+      <div class="field"><label data-i18n="sch.view"></label>
+        <select id="viewMode"><option value="detail" data-i18n="sch.viewDetail"></option><option value="simple" data-i18n="sch.viewSimple"></option><option value="board" data-i18n="sch.viewBoard"></option></select></div>
+      <div class="field"><label>&nbsp;</label><button class="btn" id="btnCsv" data-i18n="sch.copyCsv"></button></div>
     </div>
   </div>
   <div id="schedStats"></div>
-  <div id="schedOut"><div class="card empty">Nenhuma escala gerada ainda. Clique em "Gerar escala".</div></div>
+  <div id="schedOut"></div>
 </section>
 
-<!-- FUNCIONARIOS -->
+<!-- EMPLOYEES -->
 <section class="view" id="v-funcionarios">
   <div class="row" style="justify-content:space-between;margin-bottom:16px">
-    <div><h2>Funcionários</h2><p class="sub" style="margin:0">Cadastro de pessoas e seus impedimentos de dia e horário.</p></div>
-    <div class="row"><input class="search" id="search" placeholder="Buscar por nome ou cargo"><button class="btn primary" id="btnNewEmp">+ Novo funcionário</button></div>
+    <div><h2 data-i18n="emp.title"></h2><p class="sub" style="margin:0" data-i18n="emp.sub"></p></div>
+    <div class="row"><input class="search" id="search" data-i18n-ph="emp.search"><button class="btn primary" id="btnNewEmp" data-i18n="emp.new"></button></div>
   </div>
   <div class="card" style="padding:0"><table id="empTable"></table></div>
 </section>
 
-<!-- EMPRESA -->
+<!-- COMPANY -->
 <section class="view" id="v-empresa">
-  <h2>Configuração da empresa</h2>
-  <p class="sub">Horário de funcionamento por dia da semana e quantas pessoas precisam estar trabalhando ao mesmo tempo.</p>
+  <h2 data-i18n="co.title"></h2>
+  <p class="sub" data-i18n="co.sub"></p>
   <div class="card">
-    <h3>Funcionamento</h3>
+    <h3 data-i18n="co.hours"></h3>
     <table id="compTable"></table>
   </div>
   <div class="card">
-    <h3>Regras de jornada</h3>
+    <h3 data-i18n="co.rules"></h3>
     <div class="grid2">
-      <div class="field"><label>Duração do turno (horas)</label><input type="number" id="shiftHours" min="2" max="12" step="0.5"></div>
-      <div class="field"><label>Turno mínimo parcial (horas)</label><input type="number" id="minPartial" min="1" max="12" step="0.5"></div>
-      <div class="field"><label>Descanso mínimo entre jornadas (horas)</label><input type="number" id="minRest" min="0" max="24" step="1"></div>
-      <div class="field"><label>Padrão: máx. horas/semana</label><input type="number" id="defHours" min="1" max="70"></div>
-      <div class="field"><label>Padrão: máx. dias/semana</label><input type="number" id="defDays" min="1" max="7"></div>
+      <div class="field"><label data-i18n="co.shiftHours"></label><input type="number" id="shiftHours" min="2" max="12" step="0.5"></div>
+      <div class="field"><label data-i18n="co.minPartial"></label><input type="number" id="minPartial" min="1" max="12" step="0.5"></div>
+      <div class="field"><label data-i18n="co.minRest"></label><input type="number" id="minRest" min="0" max="24" step="1"></div>
+      <div class="field"><label data-i18n="co.defHours"></label><input type="number" id="defHours" min="1" max="70"></div>
+      <div class="field"><label data-i18n="co.defDays"></label><input type="number" id="defDays" min="1" max="7"></div>
     </div>
-    <p class="muted" style="margin:12px 0 0">Quando ninguém pode cobrir um turno inteiro, o sistema tenta encaixar um turno parcial dentro da disponibilidade da pessoa (desde que tenha pelo menos o mínimo parcial). O trecho que sobrar aparece como lacuna.</p>
+    <p class="muted" style="margin:12px 0 0" data-i18n="co.partialNote"></p>
   </div>
 </section>
 
-<!-- DADOS -->
+<!-- DATA -->
 <section class="view" id="v-dados">
-  <h2>Dados</h2>
-  <p class="sub">Os dados ficam salvos neste navegador. Use o backup em JSON para guardar ou levar para outro computador.</p>
+  <h2 data-i18n="data.title"></h2>
+  <p class="sub" data-i18n="data.sub"></p>
   <div class="card">
-    <h3>Backup</h3>
+    <h3 data-i18n="data.backup"></h3>
     <div class="row" style="margin-bottom:10px">
-      <button class="btn" id="btnExport">Gerar JSON</button>
-      <button class="btn" id="btnCopyJson">Copiar</button>
-      <button class="btn primary" id="btnImport">Importar JSON colado</button>
-      <button class="btn danger" id="btnReset">Restaurar dados de exemplo</button>
+      <button class="btn" id="btnExport" data-i18n="data.export"></button>
+      <button class="btn" id="btnCopyJson" data-i18n="data.copy"></button>
+      <button class="btn primary" id="btnImport" data-i18n="data.import"></button>
+      <button class="btn danger" id="btnReset" data-i18n="data.reset"></button>
     </div>
-    <textarea id="jsonBox" placeholder="Cole aqui um backup para importar"></textarea>
+    <textarea id="jsonBox" data-i18n-ph="data.ph"></textarea>
   </div>
 </section>
 </main>
 
-<!-- MODAL FUNCIONARIO -->
+<!-- EMPLOYEE MODAL -->
 <div class="modal-bg" id="empModal">
   <div class="modal">
-    <h3 id="empModalTitle">Funcionário</h3>
+    <h3 id="empModalTitle"></h3>
     <div class="grid2">
-      <div class="field"><label>Nome *</label><input id="eName"></div>
-      <div class="field"><label>Cargo / função</label><input id="eRole"></div>
-      <div class="field"><label>Máx. horas por semana</label><input type="number" id="eHours" min="1" max="70"></div>
-      <div class="field"><label>Máx. dias por semana</label><input type="number" id="eDays" min="1" max="7"></div>
-      <div class="field"><label>Situação</label><select id="eActive"><option value="1">Ativo</option><option value="0">Inativo (fora da escala)</option></select></div>
+      <div class="field"><label data-i18n="emp.name"></label><input id="eName"></div>
+      <div class="field"><label data-i18n="emp.role"></label><input id="eRole"></div>
+      <div class="field"><label data-i18n="emp.maxHours"></label><input type="number" id="eHours" min="1" max="70"></div>
+      <div class="field"><label data-i18n="emp.maxDays"></label><input type="number" id="eDays" min="1" max="7"></div>
+      <div class="field"><label data-i18n="emp.status"></label><select id="eActive"><option value="1" data-i18n="emp.active"></option><option value="0" data-i18n="emp.inactiveOpt"></option></select></div>
     </div>
-    <h3 style="margin-top:20px">Restrições e entraves</h3>
-    <p class="muted" style="margin-top:-8px">Fixas valem toda semana. Pontuais valem só no período informado (folga, consulta, curso etc).</p>
+    <h3 style="margin-top:20px" data-i18n="emp.restTitle"></h3>
+    <p class="muted" style="margin-top:-8px" data-i18n="emp.restSub"></p>
     <div id="restList"></div>
     <div class="row" style="margin:6px 0 18px">
-      <button class="btn sm" id="btnAddRec">+ Restrição fixa</button>
-      <button class="btn sm" id="btnAddOne">+ Entrave pontual</button>
+      <button class="btn sm" id="btnAddRec" data-i18n="emp.addRec"></button>
+      <button class="btn sm" id="btnAddOne" data-i18n="emp.addOne"></button>
     </div>
     <div class="row" style="justify-content:flex-end">
-      <button class="btn" id="btnCancel">Cancelar</button>
-      <button class="btn primary" id="btnSave">Salvar</button>
+      <button class="btn" id="btnCancel" data-i18n="btn.cancel"></button>
+      <button class="btn primary" id="btnSave" data-i18n="btn.save"></button>
     </div>
   </div>
 </div>
 
-<!-- MODAL CONFIRM -->
+<!-- CONFIRM MODAL -->
 <div class="modal-bg" id="confirmModal">
   <div class="modal" style="max-width:420px">
-    <h3 id="confirmMsg">Confirmar?</h3>
-    <div class="row" style="justify-content:flex-end"><button class="btn" id="cNo">Cancelar</button><button class="btn primary" id="cYes">Confirmar</button></div>
+    <h3 id="confirmMsg"></h3>
+    <div class="row" style="justify-content:flex-end"><button class="btn" id="cNo" data-i18n="btn.cancel"></button><button class="btn primary" id="cYes" data-i18n="btn.confirm"></button></div>
   </div>
 </div>
 
-<!-- MODAL CELULA -->
+<!-- CELL MODAL -->
 <div class="modal-bg" id="cellModal">
   <div class="modal" style="max-width:440px">
-    <h3 id="cellTitle">Ajustar turno</h3>
-    <div class="field" style="margin-bottom:10px"><label>Pessoa neste turno</label><select id="cPerson"></select></div>
+    <h3 id="cellTitle"></h3>
+    <div class="field" style="margin-bottom:10px"><label data-i18n="cell.person"></label><select id="cPerson"></select></div>
     <div class="row">
-      <div class="field"><label>Início</label><input type="time" id="cStart"></div>
-      <div class="field"><label>Fim</label><input type="time" id="cEnd"></div>
+      <div class="field"><label data-i18n="cell.start"></label><input type="time" id="cStart"></div>
+      <div class="field"><label data-i18n="cell.end"></label><input type="time" id="cEnd"></div>
     </div>
     <p class="muted" id="cellWarn"></p>
     <div class="row" style="justify-content:flex-end;margin-top:10px">
-      <button class="btn danger" id="cClear">Remover turno</button>
-      <button class="btn" id="cCancel">Cancelar</button>
-      <button class="btn primary" id="cSave">Salvar</button>
+      <button class="btn danger" id="cClear" data-i18n="cell.remove"></button>
+      <button class="btn" id="cCancel" data-i18n="btn.cancel"></button>
+      <button class="btn primary" id="cSave" data-i18n="btn.save"></button>
     </div>
   </div>
 </div>
@@ -239,70 +291,208 @@ textarea{width:100%;min-height:160px;font-family:'JetBrains Mono',monospace;font
 <div class="toast" id="toast"></div>
 
 <script>
-const DAYS=['Seg','Ter','Qua','Qui','Sex','Sáb','Dom'];
-const DAYS_FULL=['Segunda','Terça','Quarta','Quinta','Sexta','Sábado','Domingo'];
+/* ---------- i18n ---------- */
+const I18N={
+en:{
+  'lang.title':'Language',
+  'theme.toLight':'Switch to light theme','theme.toDark':'Switch to dark theme',
+  'nav.schedule':'Schedule','nav.employees':'Employees','nav.company':'Company','nav.data':'Data',
+  'days':['Mon','Tue','Wed','Thu','Fri','Sat','Sun'],
+  'daysFull':['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'],
+  'daysUpper':['MONDAY','TUESDAY','WEDNESDAY','THURSDAY','FRIDAY','SATURDAY','SUNDAY'],
+  'sch.title':'Generate schedule',
+  'sch.sub':'Pick the period. The schedule follows company hours, minimum coverage, each person\'s restrictions, weekly limits and rest between shifts.',
+  'sch.period':'Period','sch.weekly':'Weekly','sch.monthly':'Monthly','sch.weekPick':'Week (any day in it)','sch.month':'Month',
+  'sch.generate':'Generate schedule','sch.view':'View','sch.viewDetail':'Detailed (by person)','sch.viewSimple':'Simplified (print)','sch.viewBoard':'Board (cards)','sch.copyCsv':'Copy CSV',
+  'sch.empty':'No schedule generated yet. Click "Generate schedule".',
+  'sch.inSchedule':'People in this schedule:','sch.addToSchedule':'+ Add to schedule','sch.allIn':'Everyone registered is already in the schedule.',
+  'sch.hint':'Click a shift to change the person or the time. Click a day off to schedule someone.',
+  'sch.weekOf':'Week of {a} to {b}','sch.employee':'Employee','sch.hours':'Hours','sch.closed':'closed','sch.unavail':'unav.','sch.unavailTitle':'Unavailable','sch.off':'off',
+  'sch.coverage':'Minimum coverage','sch.removeFromSchedule':'Remove from schedule',
+  'sch.legend':['Full shift','Partial shift (due to restriction)','Unavailable all day','Coverage met','Short-staffed'],
+  'sch.clickCell':'Click any cell to adjust or remove a shift manually.',
+  'sch.simpleNote':'Morning is the shift that starts at opening, Afternoon runs until closing and Midday sits in the middle of the day. Orange names are partial shifts. Click a name to change the person or the time. Hover to see the exact hours.',
+  'sch.gapsTitle':'Coverage gaps (automatic generation)',
+  'sch.gapsHelp':'To fix: add more people, raise weekly limits, lower minimum coverage or review the restrictions.',
+  'st.people':'people in the schedule','st.shifts':'shifts','st.hours':'hours allocated','st.cov':'days with full coverage',
+  'board.off':'Off','board.note':'Each person keeps the same color across the schedule. Click a card or an off-day avatar to change the person or the time.','board.today':'Today',
+  'simple.range':'{a} TO {b}','simple.staff':'STAFF','simple.periods':['MORNING','MIDDAY','AFTERNOON'],'simple.off':'DAY OFF','simple.clickToSchedule':'Click to schedule {n}',
+  'emp.title':'Employees','emp.sub':'People and their day and time constraints.','emp.search':'Search by name or role','emp.new':'+ New employee',
+  'emp.none':'No employees registered.','emp.colName':'Name','emp.colRole':'Role','emp.colLimits':'Limits','emp.colRest':'Restrictions and constraints',
+  'emp.limits':'{h} h / {d} days','emp.noRest':'No restrictions','emp.inactive':'inactive','btn.edit':'Edit','btn.delete':'Delete',
+  'emp.confirmDelete':'Delete {n}?','emp.deleted':'Employee deleted',
+  'emp.editTitle':'Edit employee','emp.newTitle':'New employee',
+  'emp.name':'Name *','emp.role':'Role / position','emp.maxHours':'Max hours per week','emp.maxDays':'Max days per week','emp.status':'Status',
+  'emp.active':'Active','emp.inactiveOpt':'Inactive (left out of the schedule)',
+  'emp.restTitle':'Restrictions and constraints',
+  'emp.restSub':'Recurring ones apply every week. One-off ones apply only in the given period (day off, appointment, course etc).',
+  'emp.addRec':'+ Recurring restriction','emp.addOne':'+ One-off constraint',
+  'emp.noRestModal':'No restrictions. This person can work any time the company is open.',
+  'rest.recurring':'Recurring (every week)','rest.oneoff':'One-off','rest.remove':'Remove','rest.from':'From','rest.to':'To',
+  'rest.off':'Unavailable all day','rest.after':'Cannot work after','rest.before':'Cannot work before','rest.between':'Unavailable between','rest.and':'and',
+  'rest.note':'Reason (optional)',
+  'rl.allDays':'Every day','rl.range':'{a} to {b}','rl.off':'unavailable all day','rl.after':'not after {t}','rl.before':'not before {t}','rl.between':'unavailable {a} to {b}',
+  'emp.needName':'Please enter the name','emp.needRest':'Complete the days/dates and times of the restrictions','emp.saved':'Employee saved',
+  'co.title':'Company settings','co.sub':'Opening hours for each weekday and how many people must be working at the same time.',
+  'co.hours':'Opening hours','co.colDay':'Day','co.colOpen':'Open?','co.colStart':'Start','co.colEnd':'End','co.colStaff':'People at the same time','co.colSpan':'Hours open','co.closed':'Closed',
+  'co.rules':'Working-time rules','co.shiftHours':'Shift length (hours)','co.minPartial':'Minimum partial shift (hours)','co.minRest':'Minimum rest between shifts (hours)',
+  'co.defHours':'Default: max hours/week','co.defDays':'Default: max days/week',
+  'co.partialNote':'When nobody can cover a full shift, the system tries to fit a partial shift inside someone\'s availability (as long as it reaches the minimum partial length). Whatever is left shows up as a gap.',
+  'data.title':'Data','data.sub':'Data is saved in this browser. Use the JSON backup to keep it safe or move it to another computer.',
+  'data.backup':'Backup','data.export':'Generate JSON','data.copy':'Copy','data.import':'Import pasted JSON','data.reset':'Restore sample data',
+  'data.ph':'Paste a backup here to import',
+  'data.generated':'JSON generated','data.copied':'Copied','data.selectCopy':'Select and copy manually','data.invalid':'Invalid JSON',
+  'data.confirmImport':'Replace all current data with the pasted JSON?','data.imported':'Data imported','data.importedGen':'Data imported. Generate the schedule again.',
+  'data.confirmReset':'Erase everything and go back to the sample data?','data.resetDone':'Sample data restored',
+  'btn.cancel':'Cancel','btn.save':'Save','btn.confirm':'Confirm',
+  'cell.person':'Person on this shift','cell.start':'Start','cell.end':'End','cell.remove':'Remove shift',
+  'cell.hasSwap':' (has {a}-{b}, swap)','cell.unavailable':' (unavailable)',
+  'cell.restOn':'{n}\'s restrictions on this day: ','cell.noRest':'{n} has no restrictions on this day.','cell.weekHours':'Hours this week: <b>{h}</b> of {m}.',
+  't.removed':'Shift removed','t.adjusted':'Shift adjusted','t.swapped':'Shifts swapped between the two people','t.moved':'Shift moved to {n}',
+  't.conflictOther':'. Warning: restriction conflict for {n}','t.conflict':'. Warning: conflicts with {n}\'s restriction','t.overLimit':'. Weekly limit exceeded',
+  't.needEmp':'Register employees first','t.generated':'Schedule generated','t.needGen':'Generate a schedule first',
+  't.csv':'CSV copied, paste it into Excel or Sheets','t.csvFail':'Could not copy, the CSV is in the Data tab',
+  't.added':'Person added. Click the days off to schedule them.','t.confirmRemovePerson':'Remove {n} from this schedule? Their shifts will be deleted.','t.removedPerson':'Person removed from schedule',
+  'csv.employee':'Employee','csv.role':'Role',
+  'seed.notes':['College in the afternoon','Does not work on Sundays','Another job in the morning','Weekends with family','Takes child to school'],
+  'seed.roles':['Attendant','Cashier','Supervisor','Stock clerk']
+},
+pt:{
+  'lang.title':'Idioma',
+  'theme.toLight':'Mudar para tema claro','theme.toDark':'Mudar para tema escuro',
+  'nav.schedule':'Escala','nav.employees':'Funcionários','nav.company':'Empresa','nav.data':'Dados',
+  'days':['Seg','Ter','Qua','Qui','Sex','Sáb','Dom'],
+  'daysFull':['Segunda','Terça','Quarta','Quinta','Sexta','Sábado','Domingo'],
+  'daysUpper':['SEGUNDA','TERÇA','QUARTA','QUINTA','SEXTA','SÁBADO','DOMINGO'],
+  'sch.title':'Gerar escala',
+  'sch.sub':'Escolha o período. A escala respeita horário da empresa, cobertura mínima, restrições de cada pessoa, limite semanal e descanso entre jornadas.',
+  'sch.period':'Período','sch.weekly':'Semanal','sch.monthly':'Mensal','sch.weekPick':'Semana (qualquer dia dela)','sch.month':'Mês',
+  'sch.generate':'Gerar escala','sch.view':'Visualização','sch.viewDetail':'Detalhada (por pessoa)','sch.viewSimple':'Simplificada (impressão)','sch.viewBoard':'Quadro (cartões)','sch.copyCsv':'Copiar CSV',
+  'sch.empty':'Nenhuma escala gerada ainda. Clique em "Gerar escala".',
+  'sch.inSchedule':'Pessoas nesta escala:','sch.addToSchedule':'+ Adicionar à escala','sch.allIn':'Todos os cadastrados já estão na escala.',
+  'sch.hint':'Clique num turno para trocar a pessoa ou o horário. Clique numa folga para escalar alguém.',
+  'sch.weekOf':'Semana de {a} a {b}','sch.employee':'Funcionário','sch.hours':'Horas','sch.closed':'fechado','sch.unavail':'indisp.','sch.unavailTitle':'Indisponível','sch.off':'folga',
+  'sch.coverage':'Cobertura mínima','sch.removeFromSchedule':'Tirar da escala',
+  'sch.legend':['Turno completo','Turno parcial (por restrição)','Indisponível o dia todo','Cobertura atendida','Falta gente'],
+  'sch.clickCell':'Clique em qualquer célula para ajustar ou remover um turno manualmente.',
+  'sch.simpleNote':'Manhã é o turno que começa na abertura, Tarde é o que vai até o fechamento e Intermediário é o que fica no meio do dia. Nomes em laranja são turnos parciais. Clique em um nome para trocar a pessoa ou o horário. Passe o mouse para ver o horário exato.',
+  'sch.gapsTitle':'Lacunas de cobertura (geração automática)',
+  'sch.gapsHelp':'Para resolver: cadastre mais pessoas, aumente limites semanais, reduza a cobertura mínima ou revise as restrições.',
+  'st.people':'pessoas na escala','st.shifts':'turnos','st.hours':'horas alocadas','st.cov':'dias com cobertura completa',
+  'board.off':'Folga','board.note':'Cada pessoa mantém a mesma cor em toda a escala. Clique num cartão ou num avatar da folga para trocar a pessoa ou o horário.','board.today':'Hoje',
+  'simple.range':'{a} A {b}','simple.staff':'COLABORADOR','simple.periods':['MANHÃ','INTERMEDIÁRIO','TARDE'],'simple.off':'FOLGA','simple.clickToSchedule':'Clique para escalar {n}',
+  'emp.title':'Funcionários','emp.sub':'Cadastro de pessoas e seus impedimentos de dia e horário.','emp.search':'Buscar por nome ou cargo','emp.new':'+ Novo funcionário',
+  'emp.none':'Nenhum funcionário cadastrado.','emp.colName':'Nome','emp.colRole':'Cargo','emp.colLimits':'Limites','emp.colRest':'Restrições e entraves',
+  'emp.limits':'{h} h / {d} dias','emp.noRest':'Sem restrições','emp.inactive':'inativo','btn.edit':'Editar','btn.delete':'Excluir',
+  'emp.confirmDelete':'Excluir {n}?','emp.deleted':'Funcionário excluído',
+  'emp.editTitle':'Editar funcionário','emp.newTitle':'Novo funcionário',
+  'emp.name':'Nome *','emp.role':'Cargo / função','emp.maxHours':'Máx. horas por semana','emp.maxDays':'Máx. dias por semana','emp.status':'Situação',
+  'emp.active':'Ativo','emp.inactiveOpt':'Inativo (fora da escala)',
+  'emp.restTitle':'Restrições e entraves',
+  'emp.restSub':'Fixas valem toda semana. Pontuais valem só no período informado (folga, consulta, curso etc).',
+  'emp.addRec':'+ Restrição fixa','emp.addOne':'+ Entrave pontual',
+  'emp.noRestModal':'Nenhuma restrição. A pessoa pode trabalhar em qualquer horário de funcionamento.',
+  'rest.recurring':'Fixa (toda semana)','rest.oneoff':'Pontual','rest.remove':'Remover','rest.from':'De','rest.to':'Até',
+  'rest.off':'Indisponível o dia todo','rest.after':'Não pode trabalhar depois de','rest.before':'Não pode trabalhar antes de','rest.between':'Indisponível no intervalo','rest.and':'às',
+  'rest.note':'Motivo (opcional)',
+  'rl.allDays':'Todos os dias','rl.range':'{a} a {b}','rl.off':'indisponível o dia todo','rl.after':'não depois de {t}','rl.before':'não antes de {t}','rl.between':'indisponível {a} às {b}',
+  'emp.needName':'Informe o nome','emp.needRest':'Complete os dias/datas e horários das restrições','emp.saved':'Funcionário salvo',
+  'co.title':'Configuração da empresa','co.sub':'Horário de funcionamento por dia da semana e quantas pessoas precisam estar trabalhando ao mesmo tempo.',
+  'co.hours':'Funcionamento','co.colDay':'Dia','co.colOpen':'Abre?','co.colStart':'Início','co.colEnd':'Fim','co.colStaff':'Pessoas ao mesmo tempo','co.colSpan':'Horas abertas','co.closed':'Fechado',
+  'co.rules':'Regras de jornada','co.shiftHours':'Duração do turno (horas)','co.minPartial':'Turno mínimo parcial (horas)','co.minRest':'Descanso mínimo entre jornadas (horas)',
+  'co.defHours':'Padrão: máx. horas/semana','co.defDays':'Padrão: máx. dias/semana',
+  'co.partialNote':'Quando ninguém pode cobrir um turno inteiro, o sistema tenta encaixar um turno parcial dentro da disponibilidade da pessoa (desde que tenha pelo menos o mínimo parcial). O trecho que sobrar aparece como lacuna.',
+  'data.title':'Dados','data.sub':'Os dados ficam salvos neste navegador. Use o backup em JSON para guardar ou levar para outro computador.',
+  'data.backup':'Backup','data.export':'Gerar JSON','data.copy':'Copiar','data.import':'Importar JSON colado','data.reset':'Restaurar dados de exemplo',
+  'data.ph':'Cole aqui um backup para importar',
+  'data.generated':'JSON gerado','data.copied':'Copiado','data.selectCopy':'Selecione e copie manualmente','data.invalid':'JSON inválido',
+  'data.confirmImport':'Substituir todos os dados atuais pelo JSON colado?','data.imported':'Dados importados','data.importedGen':'Dados importados. Gere a escala novamente.',
+  'data.confirmReset':'Apagar tudo e voltar aos dados de exemplo?','data.resetDone':'Dados de exemplo restaurados',
+  'btn.cancel':'Cancelar','btn.save':'Salvar','btn.confirm':'Confirmar',
+  'cell.person':'Pessoa neste turno','cell.start':'Início','cell.end':'Fim','cell.remove':'Remover turno',
+  'cell.hasSwap':' (já tem {a}-{b}, troca)','cell.unavailable':' (indisponível)',
+  'cell.restOn':'Restrições de {n} neste dia: ','cell.noRest':'{n} não tem restrições neste dia.','cell.weekHours':'Horas na semana: <b>{h}</b> de {m}.',
+  't.removed':'Turno removido','t.adjusted':'Turno ajustado','t.swapped':'Turnos trocados entre as duas pessoas','t.moved':'Turno passado para {n}',
+  't.conflictOther':'. Atenção: conflito de restrição para {n}','t.conflict':'. Atenção: conflita com restrição de {n}','t.overLimit':'. Passou do limite semanal',
+  't.needEmp':'Cadastre funcionários primeiro','t.generated':'Escala gerada','t.needGen':'Gere uma escala primeiro',
+  't.csv':'CSV copiado, cole no Excel ou Planilhas','t.csvFail':'Não foi possível copiar, o CSV está na aba Dados',
+  't.added':'Pessoa adicionada. Clique nas folgas para escalar.','t.confirmRemovePerson':'Tirar {n} desta escala? Os turnos dela serão apagados.','t.removedPerson':'Pessoa removida da escala',
+  'csv.employee':'Funcionario','csv.role':'Cargo',
+  'seed.notes':['Faculdade à tarde','Não trabalha aos domingos','Outro emprego de manhã','Fins de semana com a família','Leva filho na escola'],
+  'seed.roles':['Atendente','Caixa','Supervisora','Estoquista']
+}};
+const LANG_KEY='cube4shift.lang';
+let lang='en';
+try{const l=localStorage.getItem(LANG_KEY);if(l&&I18N[l])lang=l;}catch(e){}
+function t(k,v){let s=(I18N[lang][k]??I18N.en[k]??k);if(typeof s==='string'&&v)for(const x in v)s=s.split('{'+x+'}').join(v[x]);return s;}
+const D=()=>t('days'),DF=()=>t('daysFull');
+
 const KEY='cube4shift.v1';
 const $=s=>document.querySelector(s);
 const uid=()=>Math.random().toString(36).slice(2,10);
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 
-/* ---------- dados de exemplo ---------- */
+/* ---------- sample data ---------- */
 function seed(){
+  const n=t('seed.notes'),r=t('seed.roles');
   return {
     company:{
-      days:[0,1,2,3,4,5,6].map(i=>({open:i<6||true,start:i===6?'09:00':'07:00',end:i===6?'15:00':'22:00',minStaff:i===6?1:2})),
+      days:[0,1,2,3,4,5,6].map(i=>({open:true,start:i===6?'09:00':'07:00',end:i===6?'15:00':'22:00',minStaff:i===6?1:2})),
       shiftHours:8,minPartial:4,minRest:11,defHours:44,defDays:6
     },
     employees:[
-      {id:uid(),name:'Ana Souza',role:'Atendente',maxHours:44,maxDays:6,active:true,restrictions:[
-        {id:uid(),kind:'rec',days:[0,2,4],type:'after',time:'15:00',note:'Faculdade à tarde'},
-        {id:uid(),kind:'rec',days:[6],type:'off',time:'',note:'Não trabalha aos domingos'}]},
-      {id:uid(),name:'Bruno Lima',role:'Atendente',maxHours:44,maxDays:6,active:true,restrictions:[
-        {id:uid(),kind:'rec',days:[0,1,2,3,4],type:'before',time:'12:00',note:'Outro emprego de manhã'}]},
-      {id:uid(),name:'Carla Mendes',role:'Caixa',maxHours:44,maxDays:6,active:true,restrictions:[]},
-      {id:uid(),name:'Diego Rocha',role:'Caixa',maxHours:36,maxDays:5,active:true,restrictions:[
-        {id:uid(),kind:'rec',days:[5,6],type:'off',time:'',note:'Fins de semana com a família'}]},
-      {id:uid(),name:'Elisa Ramos',role:'Supervisora',maxHours:44,maxDays:6,active:true,restrictions:[
+      {id:uid(),name:'Ana Souza',role:r[0],maxHours:44,maxDays:6,active:true,restrictions:[
+        {id:uid(),kind:'rec',days:[0,2,4],type:'after',time:'15:00',note:n[0]},
+        {id:uid(),kind:'rec',days:[6],type:'off',time:'',note:n[1]}]},
+      {id:uid(),name:'Bruno Lima',role:r[0],maxHours:44,maxDays:6,active:true,restrictions:[
+        {id:uid(),kind:'rec',days:[0,1,2,3,4],type:'before',time:'12:00',note:n[2]}]},
+      {id:uid(),name:'Carla Mendes',role:r[1],maxHours:44,maxDays:6,active:true,restrictions:[]},
+      {id:uid(),name:'Diego Rocha',role:r[1],maxHours:36,maxDays:5,active:true,restrictions:[
+        {id:uid(),kind:'rec',days:[5,6],type:'off',time:'',note:n[3]}]},
+      {id:uid(),name:'Elisa Ramos',role:r[2],maxHours:44,maxDays:6,active:true,restrictions:[
         {id:uid(),kind:'rec',days:[3],type:'after',time:'18:00',note:''}]},
-      {id:uid(),name:'Fábio Torres',role:'Atendente',maxHours:44,maxDays:6,active:true,restrictions:[]},
-      {id:uid(),name:'Gabriela Nunes',role:'Atendente',maxHours:30,maxDays:5,active:true,restrictions:[
-        {id:uid(),kind:'rec',days:[0,1,2,3,4,5,6],type:'before',time:'10:00',note:'Leva filho na escola'}]},
-      {id:uid(),name:'Henrique Alves',role:'Estoquista',maxHours:44,maxDays:6,active:true,restrictions:[]}
+      {id:uid(),name:'Fábio Torres',role:r[0],maxHours:44,maxDays:6,active:true,restrictions:[]},
+      {id:uid(),name:'Gabriela Nunes',role:r[0],maxHours:30,maxDays:5,active:true,restrictions:[
+        {id:uid(),kind:'rec',days:[0,1,2,3,4,5,6],type:'before',time:'10:00',note:n[4]}]},
+      {id:uid(),name:'Henrique Alves',role:r[3],maxHours:44,maxDays:6,active:true,restrictions:[]}
     ]
   };
 }
 let state;
 function load(){try{const r=localStorage.getItem(KEY);state=r?JSON.parse(r):seed();}catch(e){state=seed();}}
 function save(){try{localStorage.setItem(KEY,JSON.stringify(state));}catch(e){}}
-function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('show');clearTimeout(t._h);t._h=setTimeout(()=>t.classList.remove('show'),m.length>50?4500:2200);}
+function toast(m){const el=$('#toast');el.textContent=m;el.classList.add('show');clearTimeout(el._h);el._h=setTimeout(()=>el.classList.remove('show'),m.length>50?4500:2200);}
 
-/* ---------- utilidades de tempo ---------- */
-const toMin=t=>{if(!t)return null;const[h,m]=t.split(':').map(Number);return h*60+m;};
+/* ---------- time helpers ---------- */
+const toMin=x=>{if(!x)return null;const[h,m]=x.split(':').map(Number);return h*60+m;};
 const fmt=m=>{m=((m%1440)+1440)%1440;return String(Math.floor(m/60)).padStart(2,'0')+':'+String(m%60).padStart(2,'0');};
 const dIso=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
 const parseIso=s=>{const[y,m,d]=s.split('-').map(Number);return new Date(y,m-1,d);};
-const dow=d=>(d.getDay()+6)%7; // 0=Seg
+const dow=d=>(d.getDay()+6)%7; // 0=Mon
 const addDays=(d,n)=>{const x=new Date(d);x.setDate(x.getDate()+n);return x;};
 const monday=d=>addDays(d,-dow(d));
-const brDate=d=>String(d.getDate()).padStart(2,'0')+'/'+String(d.getMonth()+1).padStart(2,'0');
+const p2=n=>String(n).padStart(2,'0');
+const dm=d=>lang==='en'?p2(d.getMonth()+1)+'/'+p2(d.getDate()):p2(d.getDate())+'/'+p2(d.getMonth()+1);
+const dmy=d=>dm(d)+'/'+String(d.getFullYear()).slice(2);
 
-/* ---------- navegação ---------- */
+/* ---------- navigation ---------- */
 document.querySelectorAll('#nav button').forEach(b=>b.onclick=()=>{
   document.querySelectorAll('#nav button').forEach(x=>x.classList.toggle('active',x===b));
   document.querySelectorAll('.view').forEach(v=>v.classList.toggle('active',v.id==='v-'+b.dataset.view));
 });
 
-/* ---------- EMPRESA ---------- */
+/* ---------- COMPANY ---------- */
 function renderCompany(){
   const c=state.company;
-  let h='<tr><th>Dia</th><th>Abre?</th><th>Início</th><th>Fim</th><th>Pessoas ao mesmo tempo</th><th>Horas abertas</th></tr>';
+  let h=`<tr><th>${t('co.colDay')}</th><th>${t('co.colOpen')}</th><th>${t('co.colStart')}</th><th>${t('co.colEnd')}</th><th>${t('co.colStaff')}</th><th>${t('co.colSpan')}</th></tr>`;
   c.days.forEach((d,i)=>{
     let span=toMin(d.end)-toMin(d.start);if(span<=0)span+=1440;
-    h+=`<tr><td><b>${DAYS_FULL[i]}</b></td>
+    h+=`<tr><td><b>${DF()[i]}</b></td>
     <td><input type="checkbox" data-i="${i}" data-k="open" ${d.open?'checked':''}></td>
     <td><input type="time" data-i="${i}" data-k="start" value="${d.start}" ${d.open?'':'disabled'}></td>
     <td><input type="time" data-i="${i}" data-k="end" value="${d.end}" ${d.open?'':'disabled'}></td>
     <td><input type="number" min="1" max="50" data-i="${i}" data-k="minStaff" value="${d.minStaff}" ${d.open?'':'disabled'}></td>
-    <td class="muted">${d.open?(span/60).toFixed(1).replace('.0','')+' h':'Fechado'}</td></tr>`;
+    <td class="muted">${d.open?(span/60).toFixed(1).replace('.0','')+' h':t('co.closed')}</td></tr>`;
   });
   $('#compTable').innerHTML=h;
   $('#compTable').querySelectorAll('input').forEach(inp=>inp.onchange=()=>{
@@ -313,61 +503,61 @@ function renderCompany(){
   ['shiftHours','minPartial','minRest','defHours','defDays'].forEach(k=>{const el=$('#'+k);el.value=c[k];el.onchange=()=>{c[k]=+el.value;save();};});
 }
 
-/* ---------- FUNCIONARIOS ---------- */
+/* ---------- EMPLOYEES ---------- */
 function restLabel(r){
-  const days=r.kind==='rec'?(r.days.length===7?'Todos os dias':r.days.map(i=>DAYS[i]).join(', ')):
-    (r.from===r.to||!r.to?brDate(parseIso(r.from)):brDate(parseIso(r.from))+' a '+brDate(parseIso(r.to)));
-  const what=r.type==='off'?'indisponível o dia todo':r.type==='after'?'não depois de '+r.time:r.type==='before'?'não antes de '+r.time:'indisponível '+r.time+' às '+r.time2;
+  const days=r.kind==='rec'?(r.days.length===7?t('rl.allDays'):r.days.map(i=>D()[i]).join(', ')):
+    (r.from===r.to||!r.to?dm(parseIso(r.from)):t('rl.range',{a:dm(parseIso(r.from)),b:dm(parseIso(r.to))}));
+  const what=r.type==='off'?t('rl.off'):r.type==='after'?t('rl.after',{t:r.time}):r.type==='before'?t('rl.before',{t:r.time}):t('rl.between',{a:r.time,b:r.time2});
   return `${days}: ${what}`;
 }
 function renderEmployees(){
   const q=($('#search').value||'').toLowerCase();
   const list=state.employees.filter(e=>(e.name+' '+(e.role||'')).toLowerCase().includes(q)).sort((a,b)=>a.name.localeCompare(b.name));
-  if(!state.employees.length){$('#empTable').innerHTML='<tr><td class="empty">Nenhum funcionário cadastrado.</td></tr>';return;}
-  let h='<tr><th>Nome</th><th>Cargo</th><th>Limites</th><th>Restrições e entraves</th><th></th></tr>';
+  if(!state.employees.length){$('#empTable').innerHTML=`<tr><td class="empty">${t('emp.none')}</td></tr>`;return;}
+  let h=`<tr><th>${t('emp.colName')}</th><th>${t('emp.colRole')}</th><th>${t('emp.colLimits')}</th><th>${t('emp.colRest')}</th><th></th></tr>`;
   list.forEach(e=>{
-    const rs=e.restrictions.map(r=>`<span class="pill ${r.kind==='one'?'warn':''}" title="${(r.note||'').replace(/"/g,'&quot;')}">${restLabel(r)}</span>`).join('')||'<span class="muted">Sem restrições</span>';
-    h+=`<tr><td><b>${esc(e.name)}</b>${e.active?'':' <span class="pill bad">inativo</span>'}</td><td>${esc(e.role||'')}</td>
-    <td class="muted">${e.maxHours} h / ${e.maxDays} dias</td><td>${rs}</td>
-    <td style="white-space:nowrap"><button class="btn sm" data-edit="${e.id}">Editar</button> <button class="btn sm danger" data-del="${e.id}">Excluir</button></td></tr>`;
+    const rs=e.restrictions.map(r=>`<span class="pill ${r.kind==='one'?'warn':''}" title="${esc(r.note||'')}">${restLabel(r)}</span>`).join('')||`<span class="muted">${t('emp.noRest')}</span>`;
+    h+=`<tr><td><b>${esc(e.name)}</b>${e.active?'':` <span class="pill bad">${t('emp.inactive')}</span>`}</td><td>${esc(e.role||'')}</td>
+    <td class="muted">${t('emp.limits',{h:e.maxHours,d:e.maxDays})}</td><td>${rs}</td>
+    <td style="white-space:nowrap"><button class="btn sm" data-edit="${e.id}">${t('btn.edit')}</button> <button class="btn sm danger" data-del="${e.id}">${t('btn.delete')}</button></td></tr>`;
   });
   $('#empTable').innerHTML=h;
   $('#empTable').querySelectorAll('[data-edit]').forEach(b=>b.onclick=()=>openEmp(b.dataset.edit));
   $('#empTable').querySelectorAll('[data-del]').forEach(b=>b.onclick=()=>{
     const e=state.employees.find(x=>x.id===b.dataset.del);
-    confirmBox(`Excluir ${e.name}?`,()=>{state.employees=state.employees.filter(x=>x.id!==e.id);save();renderEmployees();toast('Funcionário excluído');});
+    confirmBox(t('emp.confirmDelete',{n:e.name}),()=>{state.employees=state.employees.filter(x=>x.id!==e.id);save();renderEmployees();toast(t('emp.deleted'));});
   });
 }
-const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 $('#search').oninput=renderEmployees;
 
 let editing=null;
 function openEmp(id){
   const c=state.company;
   editing=id?JSON.parse(JSON.stringify(state.employees.find(e=>e.id===id))):{id:uid(),name:'',role:'',maxHours:c.defHours,maxDays:c.defDays,active:true,restrictions:[]};
-  $('#empModalTitle').textContent=id?'Editar funcionário':'Novo funcionário';
+  editing._isNew=!id;
+  $('#empModalTitle').textContent=id?t('emp.editTitle'):t('emp.newTitle');
   $('#eName').value=editing.name;$('#eRole').value=editing.role||'';$('#eHours').value=editing.maxHours;$('#eDays').value=editing.maxDays;$('#eActive').value=editing.active?'1':'0';
   renderRest();$('#empModal').classList.add('open');$('#eName').focus();
 }
 function renderRest(){
   const box=$('#restList');
-  if(!editing.restrictions.length){box.innerHTML='<p class="muted">Nenhuma restrição. A pessoa pode trabalhar em qualquer horário de funcionamento.</p>';return;}
+  if(!editing.restrictions.length){box.innerHTML=`<p class="muted">${t('emp.noRestModal')}</p>`;return;}
   box.innerHTML=editing.restrictions.map(r=>{
     const when=r.kind==='rec'
-      ?`<div class="daychk">${DAYS.map((d,i)=>`<label><input type="checkbox" data-r="${r.id}" data-day="${i}" ${r.days.includes(i)?'checked':''}>${d}</label>`).join('')}</div>`
-      :`<div class="row"><div class="field"><label>De</label><input type="date" data-r="${r.id}" data-k="from" value="${r.from||''}"></div><div class="field"><label>Até</label><input type="date" data-r="${r.id}" data-k="to" value="${r.to||''}"></div></div>`;
-    return `<div class="rest-item"><div class="row" style="justify-content:space-between"><span class="pill ${r.kind==='one'?'warn':''}">${r.kind==='rec'?'Fixa (toda semana)':'Pontual'}</span><button class="btn sm danger" data-rm="${r.id}">Remover</button></div>
+      ?`<div class="daychk">${D().map((d,i)=>`<label><input type="checkbox" data-r="${r.id}" data-day="${i}" ${r.days.includes(i)?'checked':''}>${d}</label>`).join('')}</div>`
+      :`<div class="row"><div class="field"><label>${t('rest.from')}</label><input type="date" data-r="${r.id}" data-k="from" value="${r.from||''}"></div><div class="field"><label>${t('rest.to')}</label><input type="date" data-r="${r.id}" data-k="to" value="${r.to||''}"></div></div>`;
+    return `<div class="rest-item"><div class="row" style="justify-content:space-between"><span class="pill ${r.kind==='one'?'warn':''}">${r.kind==='rec'?t('rest.recurring'):t('rest.oneoff')}</span><button class="btn sm danger" data-rm="${r.id}">${t('rest.remove')}</button></div>
     ${when}
     <div class="row">
       <select data-r="${r.id}" data-k="type">
-        <option value="off" ${r.type==='off'?'selected':''}>Indisponível o dia todo</option>
-        <option value="after" ${r.type==='after'?'selected':''}>Não pode trabalhar depois de</option>
-        <option value="before" ${r.type==='before'?'selected':''}>Não pode trabalhar antes de</option>
-        <option value="between" ${r.type==='between'?'selected':''}>Indisponível no intervalo</option>
+        <option value="off" ${r.type==='off'?'selected':''}>${t('rest.off')}</option>
+        <option value="after" ${r.type==='after'?'selected':''}>${t('rest.after')}</option>
+        <option value="before" ${r.type==='before'?'selected':''}>${t('rest.before')}</option>
+        <option value="between" ${r.type==='between'?'selected':''}>${t('rest.between')}</option>
       </select>
       ${r.type==='off'?'':`<input type="time" data-r="${r.id}" data-k="time" value="${r.time||''}">`}
-      ${r.type==='between'?`<span class="muted">às</span><input type="time" data-r="${r.id}" data-k="time2" value="${r.time2||''}">`:''}
-      <input data-r="${r.id}" data-k="note" placeholder="Motivo (opcional)" value="${esc(r.note||'')}" style="flex:1;min-width:160px">
+      ${r.type==='between'?`<span class="muted">${t('rest.and')}</span><input type="time" data-r="${r.id}" data-k="time2" value="${r.time2||''}">`:''}
+      <input data-r="${r.id}" data-k="note" placeholder="${t('rest.note')}" value="${esc(r.note||'')}" style="flex:1;min-width:160px">
     </div></div>`;
   }).join('');
   box.querySelectorAll('[data-rm]').forEach(b=>b.onclick=()=>{editing.restrictions=editing.restrictions.filter(r=>r.id!==b.dataset.rm);renderRest();});
@@ -376,18 +566,19 @@ function renderRest(){
 }
 $('#btnNewEmp').onclick=()=>openEmp(null);
 $('#btnAddRec').onclick=()=>{editing.restrictions.push({id:uid(),kind:'rec',days:[],type:'off',time:'',note:''});renderRest();};
-$('#btnAddOne').onclick=()=>{const t=dIso(new Date());editing.restrictions.push({id:uid(),kind:'one',from:t,to:t,type:'off',time:'',note:''});renderRest();};
+$('#btnAddOne').onclick=()=>{const d=dIso(new Date());editing.restrictions.push({id:uid(),kind:'one',from:d,to:d,type:'off',time:'',note:''});renderRest();};
 $('#btnCancel').onclick=()=>$('#empModal').classList.remove('open');
 $('#btnSave').onclick=()=>{
   const name=$('#eName').value.trim();
-  if(!name){toast('Informe o nome');$('#eName').focus();return;}
+  if(!name){toast(t('emp.needName'));$('#eName').focus();return;}
   const bad=editing.restrictions.find(r=>(r.kind==='rec'&&!r.days.length)||(r.kind==='one'&&!r.from)||(r.type!=='off'&&!r.time)||(r.type==='between'&&!r.time2));
-  if(bad){toast('Complete os dias/datas e horários das restrições');return;}
+  if(bad){toast(t('emp.needRest'));return;}
   editing.restrictions.forEach(r=>{if(r.kind==='one'&&(!r.to||r.to<r.from))r.to=r.from;});
+  delete editing._isNew;
   Object.assign(editing,{name,role:$('#eRole').value.trim(),maxHours:+$('#eHours').value||44,maxDays:Math.min(7,+$('#eDays').value||6),active:$('#eActive').value==='1'});
   const i=state.employees.findIndex(e=>e.id===editing.id);
   if(i>=0)state.employees[i]=editing;else state.employees.push(editing);
-  save();renderEmployees();$('#empModal').classList.remove('open');toast('Funcionário salvo');
+  save();renderEmployees();$('#empModal').classList.remove('open');toast(t('emp.saved'));
 };
 
 let confirmCb=null;
@@ -395,8 +586,8 @@ function confirmBox(msg,cb){$('#confirmMsg').textContent=msg;confirmCb=cb;$('#co
 $('#cNo').onclick=()=>$('#confirmModal').classList.remove('open');
 $('#cYes').onclick=()=>{$('#confirmModal').classList.remove('open');confirmCb&&confirmCb();};
 
-/* ---------- MOTOR DE ESCALA ---------- */
-// Retorna janela disponível [lo,hi] (minutos do dia, hi pode passar de 1440) para a pessoa no dia, dentro de [s,e]; lista de intervalos bloqueados.
+/* ---------- SCHEDULING ENGINE ---------- */
+// blocked intervals (minutes of the day, may go past 1440) for a person on a date
 function blocksFor(emp,date){
   const iso=dIso(date),wd=dow(date),out=[];
   emp.restrictions.forEach(r=>{
@@ -410,7 +601,7 @@ function blocksFor(emp,date){
   return out;
 }
 const overlaps=(s,e,blocks)=>blocks.some(([a,b])=>s<b&&e>a);
-// maior sub-intervalo livre dentro de [s,e]
+// largest free sub-interval inside [s,e]
 function freeWithin(s,e,blocks){
   let segs=[[s,e]];
   blocks.forEach(([a,b])=>{segs=segs.flatMap(([x,y])=>{if(b<=x||a>=y)return[[x,y]];const r=[];if(a>x)r.push([x,a]);if(b<y)r.push([b,y]);return r;});});
@@ -428,8 +619,7 @@ function slotsFor(day){
 }
 function generate(start,end){
   const c=state.company,emps=state.employees.filter(e=>e.active);
-  const assign={}; // empId -> iso -> {s,e,partial}
-  const gaps=[],stats={};
+  const assign={},gaps=[],stats={};
   emps.forEach(e=>{assign[e.id]={};stats[e.id]={total:0,days:0};});
   let week={},lastEnd={};
   for(let d=new Date(start);d<=end;d=addDays(d,1)){
@@ -437,9 +627,8 @@ function generate(start,end){
     const iso=dIso(d),day=c.days[dow(d)];
     if(!day.open)continue;
     const dayAbs=Math.round((d-start)/864e5)*1440;
-    const slots=slotsFor(day);
     const busy=new Set();
-    slots.forEach(([s,e])=>{
+    slotsFor(day).forEach(([s,e])=>{
       for(let k=0;k<day.minStaff;k++){
         const can=(emp,ss,ee)=>{
           if(busy.has(emp.id))return false;
@@ -449,10 +638,10 @@ function generate(start,end){
           return true;
         };
         const rank=(a,b)=>(week[a.id].h-week[b.id].h)||(stats[a.id].total-stats[b.id].total)||a.name.localeCompare(b.name);
-        let pool=emps.filter(emp=>can(emp,s,e)&&!overlaps(s,e,blocksFor(emp,d))).sort(rank);
+        const pool=emps.filter(emp=>can(emp,s,e)&&!overlaps(s,e,blocksFor(emp,d))).sort(rank);
         let pick=pool[0],ps=s,pe=e,partial=false;
         if(!pick){
-          // turno parcial dentro da disponibilidade
+          // partial shift inside the person's availability
           const opts=emps.map(emp=>{const f=freeWithin(s,e,blocksFor(emp,d));return f&&f[1]-f[0]>=c.minPartial*60&&can(emp,f[0],f[1])?{emp,f}:null;}).filter(Boolean)
             .sort((x,y)=>((y.f[1]-y.f[0])-(x.f[1]-x.f[0]))||rank(x.emp,y.emp));
           if(opts.length){pick=opts[0].emp;[ps,pe]=opts[0].f;partial=true;
@@ -469,83 +658,82 @@ function generate(start,end){
   return {start:dIso(start),end:dIso(end),assign,gaps,empIds:emps.map(e=>e.id)};
 }
 
-/* ---------- RENDER ESCALA ---------- */
+/* ---------- SCHEDULE RENDER ---------- */
 let current=null;
 function coverage(iso){
   const day=state.company.days[dow(parseIso(iso))];if(!day.open)return null;
   const s=toMin(day.start);let e=toMin(day.end);if(e<=s)e+=1440;
   let minc=Infinity;
-  for(let t=s;t<e;t+=15){let n=0;current.empIds.forEach(id=>{const a=current.assign[id]?.[iso];if(a&&a.s<=t&&a.e>t)n++;});minc=Math.min(minc,n);}
+  for(let x=s;x<e;x+=15){let n=0;current.empIds.forEach(id=>{const a=current.assign[id]?.[iso];if(a&&a.s<=x&&a.e>x)n++;});minc=Math.min(minc,n);}
   return {min:minc,need:day.minStaff};
 }
+function showEmpty(msgKey){$('#schedOut').innerHTML=`<div class="card empty">${t(msgKey)}</div>`;$('#schedStats').innerHTML='';}
 function renderSchedule(){
-  if(!current)return;
+  if(!current){showEmpty('sch.empty');return;}
   state.schedule=current;save();
   const start=parseIso(current.start),end=parseIso(current.end);
   const emps=current.empIds.map(id=>state.employees.find(e=>e.id===id)).filter(Boolean);
-  // agrupar por semana
   const weeks=[];let wk=[];
   for(let d=new Date(start);d<=end;d=addDays(d,1)){if(dow(d)===0&&wk.length){weeks.push(wk);wk=[];}wk.push(new Date(d));}
   if(wk.length)weeks.push(wk);
   const outside=state.employees.filter(e=>!current.empIds.includes(e.id)).sort((a,b)=>a.name.localeCompare(b.name));
-  let html=`<div class="card row" style="padding:12px 18px"><b>Pessoas nesta escala:</b> ${emps.length}
-    ${outside.length?`<select id="addSel">${outside.map(e=>`<option value="${e.id}">${esc(e.name)}${e.active?'':' (inativo)'}</option>`).join('')}</select><button class="btn sm" id="btnAddPerson">+ Adicionar à escala</button>`:'<span class="muted">Todos os cadastrados já estão na escala.</span>'}
-    <span class="muted" style="margin-left:auto">Clique num turno para trocar a pessoa ou o horário. Clique numa folga para escalar alguém.</span></div>`;
+  let html=`<div class="card row" style="padding:12px 18px"><b>${t('sch.inSchedule')}</b> ${emps.length}
+    ${outside.length?`<select id="addSel">${outside.map(e=>`<option value="${e.id}">${esc(e.name)}${e.active?'':` (${t('emp.inactive')})`}</option>`).join('')}</select><button class="btn sm" id="btnAddPerson">${t('sch.addToSchedule')}</button>`:`<span class="muted">${t('sch.allIn')}</span>`}
+    <span class="muted" style="margin-left:auto">${t('sch.hint')}</span></div>`;
   if(state.viewMode==='simple'){html+=renderSimple(weeks,emps);}
+  else if(state.viewMode==='board'){html+=renderBoard(weeks,emps);}
   else weeks.forEach(days=>{
-    html+=`<div class="card weekblock"><h4>Semana de ${brDate(days[0])} a ${brDate(days[days.length-1])}</h4><div class="sched-wrap"><table class="sched"><tr><th class="name">Funcionário</th>`;
-    days.forEach(d=>{const op=state.company.days[dow(d)].open;html+=`<th class="${op?'':'closed'}">${DAYS[dow(d)]}<small>${brDate(d)}</small></th>`;});
-    html+='<th>Horas</th></tr>';
+    html+=`<div class="card weekblock"><h4>${t('sch.weekOf',{a:dm(days[0]),b:dm(days[days.length-1])})}</h4><div class="sched-wrap"><table class="sched"><tr><th class="name">${t('sch.employee')}</th>`;
+    days.forEach(d=>{const op=state.company.days[dow(d)].open;html+=`<th class="${op?'':'closed'}">${D()[dow(d)]}<small>${dm(d)}</small></th>`;});
+    html+=`<th>${t('sch.hours')}</th></tr>`;
     emps.forEach(e=>{
-      let h=0;html+=`<tr><td class="name"><button class="btn sm danger" style="float:right;padding:0 7px" title="Tirar da escala" data-rmp="${e.id}">×</button><b>${esc(e.name)}</b><br><span class="muted" style="font-size:12px">${esc(e.role||'')}</span></td>`;
+      let h=0;html+=`<tr><td class="name"><button class="btn sm danger" style="float:right;padding:0 7px" title="${t('sch.removeFromSchedule')}" data-rmp="${e.id}">×</button><b>${esc(e.name)}</b><br><span class="muted" style="font-size:12px">${esc(e.role||'')}</span></td>`;
       days.forEach(d=>{
         const iso=dIso(d),a=current.assign[e.id][iso],op=state.company.days[dow(d)].open;
         if(a){h+=(a.e-a.s)/60;html+=`<td class="shift ${a.partial?'partial':''}" data-e="${e.id}" data-d="${iso}">${fmt(a.s)}<br>${fmt(a.e)}</td>`;}
-        else if(!op)html+='<td class="closed">fechado</td>';
-        else{const bl=blocksFor(e,d).some(b=>b[0]<-1e8&&b[1]>1e8);html+=bl?`<td class="blocked" data-e="${e.id}" data-d="${iso}" title="Indisponível">indisp.</td>`:`<td class="off" data-e="${e.id}" data-d="${iso}">folga</td>`;}
+        else if(!op)html+=`<td class="closed">${t('sch.closed')}</td>`;
+        else{const bl=blocksFor(e,d).some(b=>b[0]<-1e8&&b[1]>1e8);html+=bl?`<td class="blocked" data-e="${e.id}" data-d="${iso}" title="${t('sch.unavailTitle')}">${t('sch.unavail')}</td>`:`<td class="off" data-e="${e.id}" data-d="${iso}">${t('sch.off')}</td>`;}
       });
       html+=`<td><b>${h.toFixed(1).replace('.0','')}</b><span class="muted">/${e.maxHours}</span></td></tr>`;
     });
-    html+='<tr class="cov"><td class="name">Cobertura mínima</td>';
+    html+=`<tr class="cov"><td class="name">${t('sch.coverage')}</td>`;
     days.forEach(d=>{const cv=coverage(dIso(d));html+=cv?`<td><span class="pill ${cv.min>=cv.need?'ok':'bad'}">${cv.min}/${cv.need}</span></td>`:'<td class="closed">-</td>';});
     html+='<td></td></tr></table></div></div>';
   });
-  if(state.viewMode==='simple')html+=`<p class="muted">Manhã é o turno que começa na abertura, Tarde é o que vai até o fechamento e Intermediário é o que fica no meio do dia. Nomes em laranja são turnos parciais. Clique em um nome para trocar a pessoa ou o horário. Passe o mouse para ver o horário exato.</p>`;
-  else html+=`<div class="legend"><span style="--c:var(--accent-soft)">Turno completo</span><span style="--c:var(--warn-soft)">Turno parcial (por restrição)</span><span style="--c:var(--line)">Indisponível o dia todo</span><span style="--c:var(--ok-soft)">Cobertura atendida</span><span style="--c:var(--bad-soft)">Falta gente</span></div>
-  <p class="muted">Clique em qualquer célula para ajustar ou remover um turno manualmente.</p>`;
+  if(state.viewMode==='simple')html+=`<p class="muted">${t('sch.simpleNote')}</p>`;
+  else if(state.viewMode==='board')html+=`<p class="muted">${t('board.note')}</p>`;
+  else{const L=t('sch.legend');html+=`<div class="legend"><span style="--c:var(--accent-soft)">${L[0]}</span><span style="--c:var(--warn-soft)">${L[1]}</span><span style="--c:var(--line)">${L[2]}</span><span style="--c:var(--ok-soft)">${L[3]}</span><span style="--c:var(--bad-soft)">${L[4]}</span></div>
+  <p class="muted">${t('sch.clickCell')}</p>`;}
   if(current.gaps.length){
-    const merged={};current.gaps.forEach(g=>{(merged[g.iso]=merged[g.iso]||[]).push(fmt(g.s)+' às '+fmt(g.e));});
-    html+=`<div class="card"><h3>Lacunas de cobertura (geração automática)</h3>${Object.entries(merged).map(([iso,l])=>`<div style="margin-bottom:6px"><b>${DAYS[dow(parseIso(iso))]} ${brDate(parseIso(iso))}</b>: ${[...new Set(l)].map(x=>`<span class="pill bad">${x}</span>`).join('')}</div>`).join('')}
-    <p class="muted" style="margin:8px 0 0">Para resolver: cadastre mais pessoas, aumente limites semanais, reduza a cobertura mínima ou revise as restrições.</p></div>`;
+    const merged={};current.gaps.forEach(g=>{(merged[g.iso]=merged[g.iso]||[]).push(fmt(g.s)+' - '+fmt(g.e));});
+    html+=`<div class="card"><h3>${t('sch.gapsTitle')}</h3>${Object.entries(merged).map(([iso,l])=>`<div style="margin-bottom:6px"><b>${D()[dow(parseIso(iso))]} ${dm(parseIso(iso))}</b>: ${[...new Set(l)].map(x=>`<span class="pill bad">${x}</span>`).join('')}</div>`).join('')}
+    <p class="muted" style="margin:8px 0 0">${t('sch.gapsHelp')}</p></div>`;
   }
   $('#schedOut').innerHTML=html;
-  // stats
   let totalH=0,shifts=0;emps.forEach(e=>Object.values(current.assign[e.id]).forEach(a=>{totalH+=(a.e-a.s)/60;shifts++;}));
   let covOk=0,covN=0;for(let d=new Date(start);d<=end;d=addDays(d,1)){const cv=coverage(dIso(d));if(cv){covN++;if(cv.min>=cv.need)covOk++;}}
-  $('#schedStats').innerHTML=`<div class="stats"><div class="stat"><b>${emps.length}</b><span>pessoas na escala</span></div><div class="stat"><b>${shifts}</b><span>turnos</span></div><div class="stat"><b>${totalH.toFixed(0)} h</b><span>horas alocadas</span></div><div class="stat"><b>${covOk}/${covN}</b><span>dias com cobertura completa</span></div></div>`;
+  $('#schedStats').innerHTML=`<div class="stats"><div class="stat"><b>${emps.length}</b><span>${t('st.people')}</span></div><div class="stat"><b>${shifts}</b><span>${t('st.shifts')}</span></div><div class="stat"><b>${totalH.toFixed(0)} h</b><span>${t('st.hours')}</span></div><div class="stat"><b>${covOk}/${covN}</b><span>${t('st.cov')}</span></div></div>`;
   $('#schedOut').querySelectorAll('[data-e][data-d]').forEach(td=>td.onclick=()=>openCell(td.dataset.e,td.dataset.d));
   const ab=$('#btnAddPerson');
-  if(ab)ab.onclick=()=>{const id=$('#addSel').value;current.empIds.push(id);current.assign[id]=current.assign[id]||{};renderSchedule();toast('Pessoa adicionada. Clique nas folgas para escalar.');};
+  if(ab)ab.onclick=()=>{const id=$('#addSel').value;current.empIds.push(id);current.assign[id]=current.assign[id]||{};renderSchedule();toast(t('t.added'));};
   $('#schedOut').querySelectorAll('[data-rmp]').forEach(b=>b.onclick=ev=>{ev.stopPropagation();
     const e=state.employees.find(x=>x.id===b.dataset.rmp);
-    confirmBox(`Tirar ${e.name} desta escala? Os turnos dela serão apagados.`,()=>{current.empIds=current.empIds.filter(x=>x!==e.id);delete current.assign[e.id];renderSchedule();toast('Pessoa removida da escala');});});
+    confirmBox(t('t.confirmRemovePerson',{n:e.name}),()=>{current.empIds=current.empIds.filter(x=>x!==e.id);delete current.assign[e.id];renderSchedule();toast(t('t.removedPerson'));});});
 }
 
-/* visualização simplificada, no formato da planilha impressa */
-const yy=d=>brDate(d)+'/'+String(d.getFullYear()).slice(2);
+/* simplified view, in the printed-sheet format */
 const firstName=n=>n.trim().split(/\s+/)[0];
 function periodOf(a,day){
   const s=toMin(day.start);let e=toMin(day.end);if(e<=s)e+=1440;
-  if(a.s<=s+60)return 0; // começa na abertura
-  if(a.e>=e-60)return 2; // vai até o fechamento
+  if(a.s<=s+60)return 0; // starts at opening
+  if(a.e>=e-60)return 2; // runs until closing
   const mid=(a.s+a.e)/2,third=(e-s)/3;
   return mid<s+third?0:mid<s+2*third?1:2;
 }
 function renderSimple(weeks,emps){
-  const PER=['MANHÃ','INTERMEDIÁRIO','TARDE'];
+  const PER=t('simple.periods');
   let h='<div class="simple-wrap"><table class="simple">';
   weeks.forEach(days=>{
-    // preencher a semana inteira (Seg a Dom) mesmo no recorte mensal
     const m=monday(days[0]),full=[0,1,2,3,4,5,6].map(i=>addDays(m,i));
     const inRange=d=>dIso(d)>=current.start&&dIso(d)<=current.end;
     const cols=full.map(d=>{
@@ -556,32 +744,68 @@ function renderSimple(weeks,emps){
       per.forEach(l=>l.sort((x,y)=>x.a.s-y.a.s||x.e.name.localeCompare(y.e.name)));
       return{iso,per,folga};
     });
-    h+=`<tr class="wk"><th colspan="8">${yy(days[0])} A ${yy(days[days.length-1])}</th></tr>
-    <tr class="hd"><th>COLABORADOR</th>${['SEGUNDA','TERÇA','QUARTA','QUINTA','SEXTA','SÁBADO','DOMINGO'].map(x=>`<th>${x}</th>`).join('')}</tr>`;
+    h+=`<tr class="wk"><th colspan="8">${t('simple.range',{a:dmy(days[0]),b:dmy(days[days.length-1])})}</th></tr>
+    <tr class="hd"><th>${t('simple.staff')}</th>${t('daysUpper').map(x=>`<th>${x}</th>`).join('')}</tr>`;
     PER.forEach((p,pi)=>{
       const n=Math.max(1,...cols.map(c=>c.per[pi].length));
       for(let r=0;r<n;r++){
         h+=`<tr>${r===0?`<td class="per" rowspan="${n}">${p}</td>`:''}`;
         cols.forEach(c=>{
           const it=c.per[pi][r];
-          h+=c.closed?'<td class="closed"></td>':it?`<td><span class="nm ${it.a.partial?'partial':''}" data-e="${it.e.id}" data-d="${c.iso}" title="${esc(it.e.name)}: ${fmt(it.a.s)} às ${fmt(it.a.e)}">${esc(firstName(it.e.name))}</span></td>`:'<td></td>';
+          h+=c.closed?'<td class="closed"></td>':it?`<td><span class="nm ${it.a.partial?'partial':''}" data-e="${it.e.id}" data-d="${c.iso}" title="${esc(it.e.name)}: ${fmt(it.a.s)} - ${fmt(it.a.e)}">${esc(firstName(it.e.name))}</span></td>`:'<td></td>';
         });
         h+='</tr>';
       }
     });
-    h+=`<tr class="folga"><td class="per">FOLGA</td>${cols.map(c=>c.closed?'<td class="closed"></td>':`<td>${c.folga.map(e=>`<span class="nm" data-e="${e.id}" data-d="${c.iso}" title="Clique para escalar ${esc(e.name)}">${esc(firstName(e.name))}</span>`).join('')}</td>`).join('')}</tr>`;
+    h+=`<tr class="folga"><td class="per">${t('simple.off')}</td>${cols.map(c=>c.closed?'<td class="closed"></td>':`<td>${c.folga.map(e=>`<span class="nm" data-e="${e.id}" data-d="${c.iso}" title="${esc(t('simple.clickToSchedule',{n:e.name}))}">${esc(firstName(e.name))}</span>`).join('')}</td>`).join('')}</tr>`;
   });
   return h+'</table></div>';
 }
 
+/* board view: modern card layout */
+function hueOf(id){const i=state.employees.findIndex(e=>e.id===id);return (i*137.508+210)%360;}
+const initials=n=>{const p=n.trim().split(/\s+/);return ((p[0]||'')[0]+(p.length>1?p[p.length-1][0]:'')).toUpperCase();};
+function renderBoard(weeks,emps){
+  const PER=t('simple.periods'),today=dIso(new Date());
+  const cap=s=>s.charAt(0)+s.slice(1).toLowerCase();
+  let h='';
+  weeks.forEach(days=>{
+    const m=monday(days[0]),full=[0,1,2,3,4,5,6].map(i=>addDays(m,i));
+    h+=`<div class="board-week"><h4>${t('sch.weekOf',{a:dm(days[0]),b:dm(days[days.length-1])})}</h4><div class="board">`;
+    full.forEach(d=>{
+      const iso=dIso(d),day=state.company.days[dow(d)],inRange=iso>=current.start&&iso<=current.end;
+      const head=`<div class="bhead"><div><div class="dn">${D()[dow(d)]}</div><div class="dd">${p2(d.getDate())}</div></div>`;
+      if(!inRange||!day.open){h+=`<div class="bcol closed">${head}${inRange?`<span class="muted" style="font-size:12px">${t('sch.closed')}</span>`:''}</div></div>`;return;}
+      const cv=coverage(iso);
+      h+=`<div class="bcol ${iso===today?'today':''}">${head}<span class="pill ${cv.min>=cv.need?'ok':'bad'}" title="${t('sch.coverage')}">${cv.min}/${cv.need}</span></div>`;
+      const per=[[],[],[]],off=[];
+      emps.forEach(e=>{const a=current.assign[e.id][iso];if(a)per[periodOf(a,day)].push({e,a});else off.push(e);});
+      per.forEach((l,pi)=>{
+        if(!l.length)return;
+        l.sort((x,y)=>x.a.s-y.a.s||x.e.name.localeCompare(y.e.name));
+        h+=`<div class="bper">${cap(PER[pi])}</div>`;
+        l.forEach(({e,a})=>{const hu=hueOf(e.id);
+          h+=`<div class="bcard ${a.partial?'partial':''}" style="--h:${hu}" data-e="${e.id}" data-d="${iso}" title="${esc(e.name)}${e.role?' · '+esc(e.role):''}">
+            <div class="av" style="--h:${hu}">${esc(initials(e.name))}</div>
+            <div style="min-width:0"><div class="bn">${esc(firstName(e.name))}</div><div class="bt">${fmt(a.s)}-${fmt(a.e)}${a.partial?' <b>●</b>':''}</div></div></div>`;});
+      });
+      if(off.length)h+=`<div class="boff"><div class="bper">${t('board.off')} · ${off.length}</div><div class="avs">${off.map(e=>`<div class="av" style="--h:${hueOf(e.id)}" data-e="${e.id}" data-d="${iso}" title="${esc(t('simple.clickToSchedule',{n:e.name}))}">${esc(initials(e.name))}</div>`).join('')}</div></div>`;
+      h+='</div>';
+    });
+    h+='</div></div>';
+  });
+  return h;
+}
+
+/* ---------- manual cell editing ---------- */
 let cellCtx=null;
 function openCell(eid,iso){
-  const e=state.employees.find(x=>x.id===eid),a=current.assign[eid][iso],d=parseIso(iso),day=state.company.days[dow(d)];
+  const a=current.assign[eid][iso],d=parseIso(iso),day=state.company.days[dow(d)];
   cellCtx={eid,iso};
-  $('#cellTitle').textContent=`${DAYS_FULL[dow(d)]} ${brDate(d)}`;
+  $('#cellTitle').textContent=`${DF()[dow(d)]} ${dm(d)}`;
   $('#cPerson').innerHTML=current.empIds.map(id=>state.employees.find(x=>x.id===id)).filter(Boolean).sort((x,y)=>x.name.localeCompare(y.name)).map(p=>{
     const has=current.assign[p.id][iso],full=blocksFor(p,d).some(b=>b[0]<-1e8&&b[1]>1e8);
-    const tag=p.id===eid?'':has?` (já tem ${fmt(has.s)}-${fmt(has.e)}, troca)`:full?' (indisponível)':'';
+    const tag=p.id===eid?'':has?t('cell.hasSwap',{a:fmt(has.s),b:fmt(has.e)}):full?t('cell.unavailable'):'';
     return `<option value="${p.id}" ${p.id===eid?'selected':''}>${esc(p.name)}${tag}</option>`;}).join('');
   $('#cPerson').onchange=()=>warnCell();
   $('#cStart').value=a?fmt(a.s):day.start;$('#cEnd').value=a?fmt(a.e):fmt(Math.min(toMin(day.start)+state.company.shiftHours*60,toMin(day.end)<=toMin(day.start)?toMin(day.end)+1440:toMin(day.end)));
@@ -597,74 +821,89 @@ function weekHours(eid,iso){
 function warnCell(){
   const p=state.employees.find(x=>x.id===$('#cPerson').value),d=parseIso(cellCtx.iso);
   const bl=blocksFor(p,d).map(b=>restLabel(b[2]));
-  let h=bl.length?`Restrições de ${esc(p.name)} neste dia: `+bl.map(x=>`<span class="pill warn">${x}</span>`).join(''):`${esc(p.name)} não tem restrições neste dia.`;
-  h+=`<br>Horas na semana: <b>${weekHours(p.id,cellCtx.iso).toFixed(1).replace('.0','')}</b> de ${p.maxHours}.`;
+  let h=bl.length?esc(t('cell.restOn',{n:p.name}))+bl.map(x=>`<span class="pill warn">${x}</span>`).join(''):esc(t('cell.noRest',{n:p.name}));
+  h+='<br>'+t('cell.weekHours',{h:weekHours(p.id,cellCtx.iso).toFixed(1).replace('.0',''),m:p.maxHours});
   $('#cellWarn').innerHTML=h;
 }
 $('#cCancel').onclick=()=>$('#cellModal').classList.remove('open');
-$('#cClear').onclick=()=>{delete current.assign[cellCtx.eid][cellCtx.iso];$('#cellModal').classList.remove('open');renderSchedule();toast('Turno removido');};
+$('#cClear').onclick=()=>{delete current.assign[cellCtx.eid][cellCtx.iso];$('#cellModal').classList.remove('open');renderSchedule();toast(t('t.removed'));};
 $('#cSave').onclick=()=>{
   let s=toMin($('#cStart').value),e=toMin($('#cEnd').value);if(s==null||e==null)return;if(e<=s)e+=1440;
   const {eid,iso}=cellCtx,to=$('#cPerson').value,d=parseIso(iso);
   const emp=state.employees.find(x=>x.id===to);
-  let msg='Turno ajustado';
+  let msg=t('t.adjusted');
   if(to!==eid){
     const other=current.assign[to][iso],mine=current.assign[eid][iso];
     delete current.assign[eid][iso];
-    if(other&&mine){current.assign[eid][iso]=other;msg='Turnos trocados entre as duas pessoas';}
-    else msg=`Turno passado para ${emp.name}`;
+    if(other&&mine){current.assign[eid][iso]=other;msg=t('t.swapped');}
+    else msg=t('t.moved',{n:emp.name});
     const o=state.employees.find(x=>x.id===eid);
-    if(current.assign[eid][iso]&&overlaps(other.s,other.e,blocksFor(o,d)))msg+='. Atenção: conflito de restrição para '+o.name;
+    if(current.assign[eid][iso]&&overlaps(other.s,other.e,blocksFor(o,d)))msg+=t('t.conflictOther',{n:o.name});
   }
   current.assign[to][iso]={s,e,partial:false};
   $('#cellModal').classList.remove('open');renderSchedule();
-  if(overlaps(s,e,blocksFor(emp,d)))msg+='. Atenção: conflita com restrição de '+emp.name;
-  if(weekHours(to,iso)>emp.maxHours)msg+='. Passou do limite semanal';
+  if(overlaps(s,e,blocksFor(emp,d)))msg+=t('t.conflict',{n:emp.name});
+  if(weekHours(to,iso)>emp.maxHours)msg+=t('t.overLimit');
   toast(msg);
 };
 
-/* ---------- controles de escala ---------- */
+/* ---------- schedule controls ---------- */
 $('#viewMode').onchange=()=>{state.viewMode=$('#viewMode').value;save();renderSchedule();};
 $('#mode').onchange=()=>{const m=$('#mode').value==='month';$('#f-week').style.display=m?'none':'';$('#f-month').style.display=m?'':'none';};
 $('#weekDate').value=dIso(monday(addDays(new Date(),7)));
-$('#monthDate').value=(()=>{const d=new Date();d.setMonth(d.getMonth()+1);return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');})();
+$('#monthDate').value=(()=>{const d=new Date();d.setMonth(d.getMonth()+1);return d.getFullYear()+'-'+p2(d.getMonth()+1);})();
 $('#btnGen').onclick=()=>{
-  if(!state.employees.some(e=>e.active)){toast('Cadastre funcionários primeiro');return;}
+  if(!state.employees.some(e=>e.active)){toast(t('t.needEmp'));return;}
   let s,e;
   if($('#mode').value==='week'){if(!$('#weekDate').value)return;s=monday(parseIso($('#weekDate').value));e=addDays(s,6);}
   else{if(!$('#monthDate').value)return;const[y,m]=$('#monthDate').value.split('-').map(Number);s=new Date(y,m-1,1);e=new Date(y,m,0);}
-  current=generate(s,e);renderSchedule();toast('Escala gerada');
+  current=generate(s,e);renderSchedule();toast(t('t.generated'));
 };
 $('#btnCsv').onclick=async()=>{
-  if(!current){toast('Gere uma escala primeiro');return;}
+  if(!current){toast(t('t.needGen'));return;}
   const dates=[];for(let d=parseIso(current.start);d<=parseIso(current.end);d=addDays(d,1))dates.push(dIso(d));
-  let csv='Funcionario;Cargo;'+dates.map(i=>DAYS[dow(parseIso(i))]+' '+brDate(parseIso(i))).join(';')+'\n';
+  let csv=t('csv.employee')+';'+t('csv.role')+';'+dates.map(i=>D()[dow(parseIso(i))]+' '+dm(parseIso(i))).join(';')+'\n';
   current.empIds.forEach(id=>{const e=state.employees.find(x=>x.id===id);if(!e)return;csv+=[e.name,e.role||'',...dates.map(i=>{const a=current.assign[id][i];return a?fmt(a.s)+'-'+fmt(a.e):'';})].join(';')+'\n';});
-  try{await navigator.clipboard.writeText(csv);toast('CSV copiado, cole no Excel ou Planilhas');}catch(err){$('#jsonBox').value=csv;document.querySelector('[data-view=dados]').click();toast('Não foi possível copiar, o CSV está na aba Dados');}
+  try{await navigator.clipboard.writeText(csv);toast(t('t.csv'));}catch(err){$('#jsonBox').value=csv;document.querySelector('[data-view=dados]').click();toast(t('t.csvFail'));}
 };
 
-/* ---------- DADOS ---------- */
-$('#btnExport').onclick=()=>{$('#jsonBox').value=JSON.stringify(state,null,2);toast('JSON gerado');};
-$('#btnCopyJson').onclick=async()=>{if(!$('#jsonBox').value)$('#jsonBox').value=JSON.stringify(state,null,2);try{await navigator.clipboard.writeText($('#jsonBox').value);toast('Copiado');}catch(e){$('#jsonBox').select();toast('Selecione e copie manualmente');}};
+/* ---------- DATA ---------- */
+$('#btnExport').onclick=()=>{$('#jsonBox').value=JSON.stringify(state,null,2);toast(t('data.generated'));};
+$('#btnCopyJson').onclick=async()=>{if(!$('#jsonBox').value)$('#jsonBox').value=JSON.stringify(state,null,2);try{await navigator.clipboard.writeText($('#jsonBox').value);toast(t('data.copied'));}catch(e){$('#jsonBox').select();toast(t('data.selectCopy'));}};
 $('#btnImport').onclick=()=>{
   try{const d=JSON.parse($('#jsonBox').value);if(!d.company||!Array.isArray(d.employees))throw 0;
-    confirmBox('Substituir todos os dados atuais pelo JSON colado?',()=>{state=d;save();renderAll();current=null;$('#schedOut').innerHTML='<div class="card empty">Dados importados. Gere a escala novamente.</div>';$('#schedStats').innerHTML='';toast('Dados importados');});
-  }catch(e){toast('JSON inválido');}
+    confirmBox(t('data.confirmImport'),()=>{state=d;save();current=null;renderAll();showEmpty('data.importedGen');toast(t('data.imported'));});
+  }catch(e){toast(t('data.invalid'));}
 };
-$('#btnReset').onclick=()=>confirmBox('Apagar tudo e voltar aos dados de exemplo?',()=>{state=seed();save();renderAll();current=null;$('#schedOut').innerHTML='<div class="card empty">Nenhuma escala gerada ainda.</div>';$('#schedStats').innerHTML='';toast('Dados de exemplo restaurados');});
+$('#btnReset').onclick=()=>confirmBox(t('data.confirmReset'),()=>{state=seed();save();current=null;renderAll();toast(t('data.resetDone'));});
 
 document.querySelectorAll('.modal-bg').forEach(m=>m.addEventListener('click',e=>{if(e.target===m)m.classList.remove('open');}));
 document.addEventListener('keydown',e=>{if(e.key==='Escape')document.querySelectorAll('.modal-bg.open').forEach(m=>m.classList.remove('open'));});
 
-function renderAll(){renderCompany();renderEmployees();}
-load();renderAll();
-function isDark(){const t=document.documentElement.dataset.theme;return t?t==='dark':!!(window.matchMedia&&matchMedia('(prefers-color-scheme: dark)').matches);}
-function paintThemeBtn(){const d=isDark();$('#themeBtn').textContent=d?'☀':'☾';$('#themeBtn').title=d?'Mudar para tema claro':'Mudar para tema escuro';}
-$('#themeBtn').onclick=()=>{const t=isDark()?'light':'dark';document.documentElement.dataset.theme=t;try{localStorage.setItem('cube4shift.theme',t);}catch(e){}paintThemeBtn();};
+/* ---------- theme ---------- */
+function isDark(){const x=document.documentElement.dataset.theme;return x?x==='dark':!!(window.matchMedia&&matchMedia('(prefers-color-scheme: dark)').matches);}
+function paintThemeBtn(){const d=isDark();$('#themeBtn').textContent=d?'☀':'☾';$('#themeBtn').title=d?t('theme.toLight'):t('theme.toDark');}
+$('#themeBtn').onclick=()=>{const x=isDark()?'light':'dark';document.documentElement.dataset.theme=x;try{localStorage.setItem('cube4shift.theme',x);}catch(e){}paintThemeBtn();};
 try{matchMedia('(prefers-color-scheme: dark)').addEventListener('change',paintThemeBtn);}catch(e){}
-paintThemeBtn();
+
+/* ---------- language ---------- */
+function applyI18n(){
+  document.documentElement.lang=lang==='pt'?'pt-BR':'en';
+  document.querySelectorAll('[data-i18n]').forEach(el=>el.textContent=t(el.dataset.i18n));
+  document.querySelectorAll('[data-i18n-ph]').forEach(el=>el.placeholder=t(el.dataset.i18nPh));
+  document.querySelectorAll('[data-i18n-title]').forEach(el=>el.title=t(el.dataset.i18nTitle));
+  $('#langSel').value=lang;
+  paintThemeBtn();
+}
+$('#langSel').onchange=()=>{lang=$('#langSel').value;try{localStorage.setItem(LANG_KEY,lang);}catch(e){}applyI18n();renderAll();
+  if($('#empModal').classList.contains('open')){$('#empModalTitle').textContent=editing._isNew?t('emp.newTitle'):t('emp.editTitle');renderRest();}
+  document.querySelectorAll('#cellModal.open,#confirmModal.open').forEach(m=>m.classList.remove('open'));};
+
+function renderAll(){renderCompany();renderEmployees();renderSchedule();}
+load();
+if(state.schedule){current=state.schedule;current.empIds=current.empIds.filter(id=>state.employees.some(e=>e.id===id));}
 $('#viewMode').value=state.viewMode||'detail';
-if(state.schedule){current=state.schedule;current.empIds=current.empIds.filter(id=>state.employees.some(e=>e.id===id));renderSchedule();}
+applyI18n();renderAll();
 </script>
 </body>
 </html>
