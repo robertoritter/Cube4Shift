@@ -1,0 +1,657 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cube4Shift</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f5f6f8; --panel:#fff; --ink:#1b1f27; --muted:#667085; --line:#e4e7ec;
+  --accent:#2f5bea; --accent-soft:#e8eeff; --ok:#12805c; --ok-soft:#e3f6ee;
+  --warn:#b54708; --warn-soft:#fef0e1; --bad:#c0322b; --bad-soft:#fdecea;
+  --radius:10px;
+}
+@media (prefers-color-scheme: dark){
+  :root{--bg:#12151b;--panel:#1a1e26;--ink:#e8ebf1;--muted:#98a2b3;--line:#2b313c;
+  --accent:#6f8fff;--accent-soft:#232c48;--ok:#4cc79a;--ok-soft:#163328;--warn:#f5a25d;--warn-soft:#3a2a18;--bad:#f2766d;--bad-soft:#3b1d1b;}
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:Inter,system-ui,sans-serif;background:var(--bg);color:var(--ink);font-size:14px;line-height:1.45}
+header{display:flex;align-items:center;gap:16px;padding:14px 24px;background:var(--panel);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:5;flex-wrap:wrap}
+.brand{font-weight:700;font-size:17px;letter-spacing:-.01em;display:flex;align-items:center;gap:8px}
+.brand .cube{width:22px;height:22px;border-radius:5px;background:var(--accent);display:grid;place-items:center;color:#fff;font-size:12px}
+nav{display:flex;gap:4px;margin-left:auto;flex-wrap:wrap}
+nav button{border:0;background:transparent;color:var(--muted);padding:8px 14px;border-radius:8px;font:inherit;font-weight:500;cursor:pointer}
+nav button.active{background:var(--accent-soft);color:var(--accent)}
+main{max-width:1400px;margin:0 auto;padding:24px}
+.view{display:none}.view.active{display:block}
+h2{font-size:20px;margin:0 0 4px}
+.sub{color:var(--muted);margin:0 0 20px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:18px;margin-bottom:18px}
+.card h3{margin:0 0 12px;font-size:15px}
+table{border-collapse:collapse;width:100%}
+th,td{padding:8px 10px;border-bottom:1px solid var(--line);text-align:left;vertical-align:middle}
+th{font-size:12px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);font-weight:600}
+input,select,textarea{font:inherit;color:var(--ink);background:var(--panel);border:1px solid var(--line);border-radius:7px;padding:7px 9px}
+input[type=time]{width:110px}input[type=number]{width:80px}
+input:focus,select:focus,textarea:focus{outline:2px solid var(--accent-soft);border-color:var(--accent)}
+.btn{border:1px solid var(--line);background:var(--panel);color:var(--ink);border-radius:8px;padding:8px 14px;font:inherit;font-weight:500;cursor:pointer}
+.btn:hover{border-color:var(--accent)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+.btn.danger{color:var(--bad)}
+.btn.sm{padding:4px 10px;font-size:13px}
+.row{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.field{display:flex;flex-direction:column;gap:4px}
+.field label{font-size:12px;color:var(--muted);font-weight:500}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px}
+.pill{display:inline-block;padding:2px 8px;border-radius:99px;font-size:12px;font-weight:500;background:var(--accent-soft);color:var(--accent);margin:2px 4px 2px 0}
+.pill.warn{background:var(--warn-soft);color:var(--warn)}
+.pill.bad{background:var(--bad-soft);color:var(--bad)}
+.pill.ok{background:var(--ok-soft);color:var(--ok)}
+.muted{color:var(--muted)}
+.daychk{display:flex;gap:4px;flex-wrap:wrap}
+.daychk label{display:flex;align-items:center;gap:3px;border:1px solid var(--line);border-radius:6px;padding:3px 7px;cursor:pointer;font-size:13px}
+.daychk input{margin:0}
+.daychk label:has(input:checked){background:var(--accent-soft);border-color:var(--accent);color:var(--accent)}
+.empty{padding:28px;text-align:center;color:var(--muted)}
+.sched-wrap{overflow-x:auto}
+.sched th,.sched td{border:1px solid var(--line);text-align:center;white-space:nowrap;padding:6px 8px}
+.sched th.name,.sched td.name{text-align:left;position:sticky;left:0;background:var(--panel);z-index:1;min-width:150px}
+.sched td.shift{font-family:'JetBrains Mono',monospace;font-size:12px;background:var(--accent-soft);color:var(--accent);cursor:pointer}
+.sched td.shift.partial{background:var(--warn-soft);color:var(--warn)}
+.sched td.off{color:var(--muted);font-size:12px;cursor:pointer}
+.sched td.blocked{background:repeating-linear-gradient(45deg,transparent,transparent 5px,var(--line) 5px,var(--line) 6px);color:var(--muted);font-size:11px}
+.sched td.closed,.sched th.closed{background:var(--bg);color:var(--muted)}
+.sched tr.cov td{font-size:12px;font-weight:600}
+.sched th small{display:block;font-weight:500;text-transform:none;letter-spacing:0}
+.weekblock{margin-bottom:22px}
+.weekblock h4{margin:0 0 8px;font-size:14px}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--muted);margin-top:10px}
+.legend span::before{content:"";display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:5px;vertical-align:-2px;background:var(--c)}
+.modal-bg{position:fixed;inset:0;background:rgba(10,12,18,.45);display:none;align-items:flex-start;justify-content:center;z-index:20;overflow-y:auto;padding:40px 12px}
+.modal-bg.open{display:flex}
+.modal{background:var(--panel);border-radius:12px;max-width:760px;width:100%;padding:22px;border:1px solid var(--line)}
+.modal h3{margin:0 0 14px}
+.rest-item{border:1px solid var(--line);border-radius:8px;padding:10px;margin-bottom:8px;display:grid;gap:8px}
+.simple{border-collapse:collapse;width:100%;font-size:13px;margin-bottom:0}
+.simple td,.simple th{border:1px solid var(--ink);padding:3px 8px;text-align:center;vertical-align:top;white-space:nowrap}
+.simple .wk th{font-size:15px;font-weight:700;background:var(--panel);text-transform:none;letter-spacing:0;color:var(--ink)}
+.simple .hd th{background:var(--line);color:var(--ink);font-size:12px}
+.simple td.per{font-weight:700;width:120px;text-align:center;vertical-align:middle}
+.simple .nm{display:block;cursor:pointer;border-radius:4px;text-transform:uppercase}
+.simple .nm:hover{background:var(--accent-soft)}
+.simple .nm.partial{color:var(--warn)}
+.simple tr.folga td{color:var(--bad);font-weight:700}
+.simple tr.folga td.per{color:var(--ink)}
+.simple td.closed{background:var(--bg);color:var(--muted)}
+.simple-wrap{overflow-x:auto;background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:14px;margin-bottom:18px}
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--ink);color:var(--panel);padding:10px 18px;border-radius:8px;opacity:0;transition:opacity .2s;pointer-events:none;z-index:30}
+.toast.show{opacity:1}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-bottom:18px}
+.stat{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:14px}
+.stat b{display:block;font-size:22px}
+.stat span{color:var(--muted);font-size:12px}
+textarea{width:100%;min-height:160px;font-family:'JetBrains Mono',monospace;font-size:12px}
+.search{min-width:220px}
+</style>
+</head>
+<body>
+<header>
+  <div class="brand"><div class="cube">C4</div>Cube4Shift</div>
+  <span class="muted">Escalas de trabalho</span>
+  <nav id="nav">
+    <button data-view="escala" class="active">Escala</button>
+    <button data-view="funcionarios">Funcionários</button>
+    <button data-view="empresa">Empresa</button>
+    <button data-view="dados">Dados</button>
+  </nav>
+</header>
+
+<main>
+<!-- ESCALA -->
+<section class="view active" id="v-escala">
+  <h2>Gerar escala</h2>
+  <p class="sub">Escolha o período. A escala respeita horário da empresa, cobertura mínima, restrições de cada pessoa, limite semanal e descanso entre jornadas.</p>
+  <div class="card">
+    <div class="row">
+      <div class="field"><label>Período</label>
+        <select id="mode"><option value="week">Semanal</option><option value="month">Mensal</option></select></div>
+      <div class="field" id="f-week"><label>Semana (qualquer dia dela)</label><input type="date" id="weekDate"></div>
+      <div class="field" id="f-month" style="display:none"><label>Mês</label><input type="month" id="monthDate"></div>
+      <div class="field"><label>&nbsp;</label><button class="btn primary" id="btnGen">Gerar escala</button></div>
+      <div class="field"><label>Visualização</label>
+        <select id="viewMode"><option value="detail">Detalhada (por pessoa)</option><option value="simple">Simplificada (por período)</option></select></div>
+      <div class="field"><label>&nbsp;</label><button class="btn" id="btnCsv">Copiar CSV</button></div>
+    </div>
+  </div>
+  <div id="schedStats"></div>
+  <div id="schedOut"><div class="card empty">Nenhuma escala gerada ainda. Clique em "Gerar escala".</div></div>
+</section>
+
+<!-- FUNCIONARIOS -->
+<section class="view" id="v-funcionarios">
+  <div class="row" style="justify-content:space-between;margin-bottom:16px">
+    <div><h2>Funcionários</h2><p class="sub" style="margin:0">Cadastro de pessoas e seus impedimentos de dia e horário.</p></div>
+    <div class="row"><input class="search" id="search" placeholder="Buscar por nome ou cargo"><button class="btn primary" id="btnNewEmp">+ Novo funcionário</button></div>
+  </div>
+  <div class="card" style="padding:0"><table id="empTable"></table></div>
+</section>
+
+<!-- EMPRESA -->
+<section class="view" id="v-empresa">
+  <h2>Configuração da empresa</h2>
+  <p class="sub">Horário de funcionamento por dia da semana e quantas pessoas precisam estar trabalhando ao mesmo tempo.</p>
+  <div class="card">
+    <h3>Funcionamento</h3>
+    <table id="compTable"></table>
+  </div>
+  <div class="card">
+    <h3>Regras de jornada</h3>
+    <div class="grid2">
+      <div class="field"><label>Duração do turno (horas)</label><input type="number" id="shiftHours" min="2" max="12" step="0.5"></div>
+      <div class="field"><label>Turno mínimo parcial (horas)</label><input type="number" id="minPartial" min="1" max="12" step="0.5"></div>
+      <div class="field"><label>Descanso mínimo entre jornadas (horas)</label><input type="number" id="minRest" min="0" max="24" step="1"></div>
+      <div class="field"><label>Padrão: máx. horas/semana</label><input type="number" id="defHours" min="1" max="70"></div>
+      <div class="field"><label>Padrão: máx. dias/semana</label><input type="number" id="defDays" min="1" max="7"></div>
+    </div>
+    <p class="muted" style="margin:12px 0 0">Quando ninguém pode cobrir um turno inteiro, o sistema tenta encaixar um turno parcial dentro da disponibilidade da pessoa (desde que tenha pelo menos o mínimo parcial). O trecho que sobrar aparece como lacuna.</p>
+  </div>
+</section>
+
+<!-- DADOS -->
+<section class="view" id="v-dados">
+  <h2>Dados</h2>
+  <p class="sub">Os dados ficam salvos neste navegador. Use o backup em JSON para guardar ou levar para outro computador.</p>
+  <div class="card">
+    <h3>Backup</h3>
+    <div class="row" style="margin-bottom:10px">
+      <button class="btn" id="btnExport">Gerar JSON</button>
+      <button class="btn" id="btnCopyJson">Copiar</button>
+      <button class="btn primary" id="btnImport">Importar JSON colado</button>
+      <button class="btn danger" id="btnReset">Restaurar dados de exemplo</button>
+    </div>
+    <textarea id="jsonBox" placeholder="Cole aqui um backup para importar"></textarea>
+  </div>
+</section>
+</main>
+
+<!-- MODAL FUNCIONARIO -->
+<div class="modal-bg" id="empModal">
+  <div class="modal">
+    <h3 id="empModalTitle">Funcionário</h3>
+    <div class="grid2">
+      <div class="field"><label>Nome *</label><input id="eName"></div>
+      <div class="field"><label>Cargo / função</label><input id="eRole"></div>
+      <div class="field"><label>Máx. horas por semana</label><input type="number" id="eHours" min="1" max="70"></div>
+      <div class="field"><label>Máx. dias por semana</label><input type="number" id="eDays" min="1" max="7"></div>
+      <div class="field"><label>Situação</label><select id="eActive"><option value="1">Ativo</option><option value="0">Inativo (fora da escala)</option></select></div>
+    </div>
+    <h3 style="margin-top:20px">Restrições e entraves</h3>
+    <p class="muted" style="margin-top:-8px">Fixas valem toda semana. Pontuais valem só no período informado (folga, consulta, curso etc).</p>
+    <div id="restList"></div>
+    <div class="row" style="margin:6px 0 18px">
+      <button class="btn sm" id="btnAddRec">+ Restrição fixa</button>
+      <button class="btn sm" id="btnAddOne">+ Entrave pontual</button>
+    </div>
+    <div class="row" style="justify-content:flex-end">
+      <button class="btn" id="btnCancel">Cancelar</button>
+      <button class="btn primary" id="btnSave">Salvar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL CONFIRM -->
+<div class="modal-bg" id="confirmModal">
+  <div class="modal" style="max-width:420px">
+    <h3 id="confirmMsg">Confirmar?</h3>
+    <div class="row" style="justify-content:flex-end"><button class="btn" id="cNo">Cancelar</button><button class="btn primary" id="cYes">Confirmar</button></div>
+  </div>
+</div>
+
+<!-- MODAL CELULA -->
+<div class="modal-bg" id="cellModal">
+  <div class="modal" style="max-width:440px">
+    <h3 id="cellTitle">Ajustar turno</h3>
+    <div class="field" style="margin-bottom:10px"><label>Pessoa neste turno</label><select id="cPerson"></select></div>
+    <div class="row">
+      <div class="field"><label>Início</label><input type="time" id="cStart"></div>
+      <div class="field"><label>Fim</label><input type="time" id="cEnd"></div>
+    </div>
+    <p class="muted" id="cellWarn"></p>
+    <div class="row" style="justify-content:flex-end;margin-top:10px">
+      <button class="btn danger" id="cClear">Remover turno</button>
+      <button class="btn" id="cCancel">Cancelar</button>
+      <button class="btn primary" id="cSave">Salvar</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const DAYS=['Seg','Ter','Qua','Qui','Sex','Sáb','Dom'];
+const DAYS_FULL=['Segunda','Terça','Quarta','Quinta','Sexta','Sábado','Domingo'];
+const KEY='cube4shift.v1';
+const $=s=>document.querySelector(s);
+const uid=()=>Math.random().toString(36).slice(2,10);
+
+/* ---------- dados de exemplo ---------- */
+function seed(){
+  return {
+    company:{
+      days:[0,1,2,3,4,5,6].map(i=>({open:i<6||true,start:i===6?'09:00':'07:00',end:i===6?'15:00':'22:00',minStaff:i===6?1:2})),
+      shiftHours:8,minPartial:4,minRest:11,defHours:44,defDays:6
+    },
+    employees:[
+      {id:uid(),name:'Ana Souza',role:'Atendente',maxHours:44,maxDays:6,active:true,restrictions:[
+        {id:uid(),kind:'rec',days:[0,2,4],type:'after',time:'15:00',note:'Faculdade à tarde'},
+        {id:uid(),kind:'rec',days:[6],type:'off',time:'',note:'Não trabalha aos domingos'}]},
+      {id:uid(),name:'Bruno Lima',role:'Atendente',maxHours:44,maxDays:6,active:true,restrictions:[
+        {id:uid(),kind:'rec',days:[0,1,2,3,4],type:'before',time:'12:00',note:'Outro emprego de manhã'}]},
+      {id:uid(),name:'Carla Mendes',role:'Caixa',maxHours:44,maxDays:6,active:true,restrictions:[]},
+      {id:uid(),name:'Diego Rocha',role:'Caixa',maxHours:36,maxDays:5,active:true,restrictions:[
+        {id:uid(),kind:'rec',days:[5,6],type:'off',time:'',note:'Fins de semana com a família'}]},
+      {id:uid(),name:'Elisa Ramos',role:'Supervisora',maxHours:44,maxDays:6,active:true,restrictions:[
+        {id:uid(),kind:'rec',days:[3],type:'after',time:'18:00',note:''}]},
+      {id:uid(),name:'Fábio Torres',role:'Atendente',maxHours:44,maxDays:6,active:true,restrictions:[]},
+      {id:uid(),name:'Gabriela Nunes',role:'Atendente',maxHours:30,maxDays:5,active:true,restrictions:[
+        {id:uid(),kind:'rec',days:[0,1,2,3,4,5,6],type:'before',time:'10:00',note:'Leva filho na escola'}]},
+      {id:uid(),name:'Henrique Alves',role:'Estoquista',maxHours:44,maxDays:6,active:true,restrictions:[]}
+    ]
+  };
+}
+let state;
+function load(){try{const r=localStorage.getItem(KEY);state=r?JSON.parse(r):seed();}catch(e){state=seed();}}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(state));}catch(e){}}
+function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('show');clearTimeout(t._h);t._h=setTimeout(()=>t.classList.remove('show'),m.length>50?4500:2200);}
+
+/* ---------- utilidades de tempo ---------- */
+const toMin=t=>{if(!t)return null;const[h,m]=t.split(':').map(Number);return h*60+m;};
+const fmt=m=>{m=((m%1440)+1440)%1440;return String(Math.floor(m/60)).padStart(2,'0')+':'+String(m%60).padStart(2,'0');};
+const dIso=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+const parseIso=s=>{const[y,m,d]=s.split('-').map(Number);return new Date(y,m-1,d);};
+const dow=d=>(d.getDay()+6)%7; // 0=Seg
+const addDays=(d,n)=>{const x=new Date(d);x.setDate(x.getDate()+n);return x;};
+const monday=d=>addDays(d,-dow(d));
+const brDate=d=>String(d.getDate()).padStart(2,'0')+'/'+String(d.getMonth()+1).padStart(2,'0');
+
+/* ---------- navegação ---------- */
+document.querySelectorAll('#nav button').forEach(b=>b.onclick=()=>{
+  document.querySelectorAll('#nav button').forEach(x=>x.classList.toggle('active',x===b));
+  document.querySelectorAll('.view').forEach(v=>v.classList.toggle('active',v.id==='v-'+b.dataset.view));
+});
+
+/* ---------- EMPRESA ---------- */
+function renderCompany(){
+  const c=state.company;
+  let h='<tr><th>Dia</th><th>Abre?</th><th>Início</th><th>Fim</th><th>Pessoas ao mesmo tempo</th><th>Horas abertas</th></tr>';
+  c.days.forEach((d,i)=>{
+    let span=toMin(d.end)-toMin(d.start);if(span<=0)span+=1440;
+    h+=`<tr><td><b>${DAYS_FULL[i]}</b></td>
+    <td><input type="checkbox" data-i="${i}" data-k="open" ${d.open?'checked':''}></td>
+    <td><input type="time" data-i="${i}" data-k="start" value="${d.start}" ${d.open?'':'disabled'}></td>
+    <td><input type="time" data-i="${i}" data-k="end" value="${d.end}" ${d.open?'':'disabled'}></td>
+    <td><input type="number" min="1" max="50" data-i="${i}" data-k="minStaff" value="${d.minStaff}" ${d.open?'':'disabled'}></td>
+    <td class="muted">${d.open?(span/60).toFixed(1).replace('.0','')+' h':'Fechado'}</td></tr>`;
+  });
+  $('#compTable').innerHTML=h;
+  $('#compTable').querySelectorAll('input').forEach(inp=>inp.onchange=()=>{
+    const d=c.days[inp.dataset.i],k=inp.dataset.k;
+    d[k]=k==='open'?inp.checked:k==='minStaff'?Math.max(1,+inp.value||1):inp.value;
+    save();renderCompany();
+  });
+  ['shiftHours','minPartial','minRest','defHours','defDays'].forEach(k=>{const el=$('#'+k);el.value=c[k];el.onchange=()=>{c[k]=+el.value;save();};});
+}
+
+/* ---------- FUNCIONARIOS ---------- */
+function restLabel(r){
+  const days=r.kind==='rec'?(r.days.length===7?'Todos os dias':r.days.map(i=>DAYS[i]).join(', ')):
+    (r.from===r.to||!r.to?brDate(parseIso(r.from)):brDate(parseIso(r.from))+' a '+brDate(parseIso(r.to)));
+  const what=r.type==='off'?'indisponível o dia todo':r.type==='after'?'não depois de '+r.time:r.type==='before'?'não antes de '+r.time:'indisponível '+r.time+' às '+r.time2;
+  return `${days}: ${what}`;
+}
+function renderEmployees(){
+  const q=($('#search').value||'').toLowerCase();
+  const list=state.employees.filter(e=>(e.name+' '+(e.role||'')).toLowerCase().includes(q)).sort((a,b)=>a.name.localeCompare(b.name));
+  if(!state.employees.length){$('#empTable').innerHTML='<tr><td class="empty">Nenhum funcionário cadastrado.</td></tr>';return;}
+  let h='<tr><th>Nome</th><th>Cargo</th><th>Limites</th><th>Restrições e entraves</th><th></th></tr>';
+  list.forEach(e=>{
+    const rs=e.restrictions.map(r=>`<span class="pill ${r.kind==='one'?'warn':''}" title="${(r.note||'').replace(/"/g,'&quot;')}">${restLabel(r)}</span>`).join('')||'<span class="muted">Sem restrições</span>';
+    h+=`<tr><td><b>${esc(e.name)}</b>${e.active?'':' <span class="pill bad">inativo</span>'}</td><td>${esc(e.role||'')}</td>
+    <td class="muted">${e.maxHours} h / ${e.maxDays} dias</td><td>${rs}</td>
+    <td style="white-space:nowrap"><button class="btn sm" data-edit="${e.id}">Editar</button> <button class="btn sm danger" data-del="${e.id}">Excluir</button></td></tr>`;
+  });
+  $('#empTable').innerHTML=h;
+  $('#empTable').querySelectorAll('[data-edit]').forEach(b=>b.onclick=()=>openEmp(b.dataset.edit));
+  $('#empTable').querySelectorAll('[data-del]').forEach(b=>b.onclick=()=>{
+    const e=state.employees.find(x=>x.id===b.dataset.del);
+    confirmBox(`Excluir ${e.name}?`,()=>{state.employees=state.employees.filter(x=>x.id!==e.id);save();renderEmployees();toast('Funcionário excluído');});
+  });
+}
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+$('#search').oninput=renderEmployees;
+
+let editing=null;
+function openEmp(id){
+  const c=state.company;
+  editing=id?JSON.parse(JSON.stringify(state.employees.find(e=>e.id===id))):{id:uid(),name:'',role:'',maxHours:c.defHours,maxDays:c.defDays,active:true,restrictions:[]};
+  $('#empModalTitle').textContent=id?'Editar funcionário':'Novo funcionário';
+  $('#eName').value=editing.name;$('#eRole').value=editing.role||'';$('#eHours').value=editing.maxHours;$('#eDays').value=editing.maxDays;$('#eActive').value=editing.active?'1':'0';
+  renderRest();$('#empModal').classList.add('open');$('#eName').focus();
+}
+function renderRest(){
+  const box=$('#restList');
+  if(!editing.restrictions.length){box.innerHTML='<p class="muted">Nenhuma restrição. A pessoa pode trabalhar em qualquer horário de funcionamento.</p>';return;}
+  box.innerHTML=editing.restrictions.map(r=>{
+    const when=r.kind==='rec'
+      ?`<div class="daychk">${DAYS.map((d,i)=>`<label><input type="checkbox" data-r="${r.id}" data-day="${i}" ${r.days.includes(i)?'checked':''}>${d}</label>`).join('')}</div>`
+      :`<div class="row"><div class="field"><label>De</label><input type="date" data-r="${r.id}" data-k="from" value="${r.from||''}"></div><div class="field"><label>Até</label><input type="date" data-r="${r.id}" data-k="to" value="${r.to||''}"></div></div>`;
+    return `<div class="rest-item"><div class="row" style="justify-content:space-between"><span class="pill ${r.kind==='one'?'warn':''}">${r.kind==='rec'?'Fixa (toda semana)':'Pontual'}</span><button class="btn sm danger" data-rm="${r.id}">Remover</button></div>
+    ${when}
+    <div class="row">
+      <select data-r="${r.id}" data-k="type">
+        <option value="off" ${r.type==='off'?'selected':''}>Indisponível o dia todo</option>
+        <option value="after" ${r.type==='after'?'selected':''}>Não pode trabalhar depois de</option>
+        <option value="before" ${r.type==='before'?'selected':''}>Não pode trabalhar antes de</option>
+        <option value="between" ${r.type==='between'?'selected':''}>Indisponível no intervalo</option>
+      </select>
+      ${r.type==='off'?'':`<input type="time" data-r="${r.id}" data-k="time" value="${r.time||''}">`}
+      ${r.type==='between'?`<span class="muted">às</span><input type="time" data-r="${r.id}" data-k="time2" value="${r.time2||''}">`:''}
+      <input data-r="${r.id}" data-k="note" placeholder="Motivo (opcional)" value="${esc(r.note||'')}" style="flex:1;min-width:160px">
+    </div></div>`;
+  }).join('');
+  box.querySelectorAll('[data-rm]').forEach(b=>b.onclick=()=>{editing.restrictions=editing.restrictions.filter(r=>r.id!==b.dataset.rm);renderRest();});
+  box.querySelectorAll('[data-day]').forEach(cb=>cb.onchange=()=>{const r=editing.restrictions.find(x=>x.id===cb.dataset.r),d=+cb.dataset.day;r.days=cb.checked?[...new Set([...r.days,d])].sort():r.days.filter(x=>x!==d);});
+  box.querySelectorAll('[data-k]').forEach(inp=>inp.onchange=()=>{const r=editing.restrictions.find(x=>x.id===inp.dataset.r);r[inp.dataset.k]=inp.value;if(inp.dataset.k==='type'){if(r.type!=='off'&&!r.time)r.time=r.type==='before'?'10:00':'15:00';if(r.type==='between'&&!r.time2)r.time2='14:00';renderRest();}});
+}
+$('#btnNewEmp').onclick=()=>openEmp(null);
+$('#btnAddRec').onclick=()=>{editing.restrictions.push({id:uid(),kind:'rec',days:[],type:'off',time:'',note:''});renderRest();};
+$('#btnAddOne').onclick=()=>{const t=dIso(new Date());editing.restrictions.push({id:uid(),kind:'one',from:t,to:t,type:'off',time:'',note:''});renderRest();};
+$('#btnCancel').onclick=()=>$('#empModal').classList.remove('open');
+$('#btnSave').onclick=()=>{
+  const name=$('#eName').value.trim();
+  if(!name){toast('Informe o nome');$('#eName').focus();return;}
+  const bad=editing.restrictions.find(r=>(r.kind==='rec'&&!r.days.length)||(r.kind==='one'&&!r.from)||(r.type!=='off'&&!r.time)||(r.type==='between'&&!r.time2));
+  if(bad){toast('Complete os dias/datas e horários das restrições');return;}
+  editing.restrictions.forEach(r=>{if(r.kind==='one'&&(!r.to||r.to<r.from))r.to=r.from;});
+  Object.assign(editing,{name,role:$('#eRole').value.trim(),maxHours:+$('#eHours').value||44,maxDays:Math.min(7,+$('#eDays').value||6),active:$('#eActive').value==='1'});
+  const i=state.employees.findIndex(e=>e.id===editing.id);
+  if(i>=0)state.employees[i]=editing;else state.employees.push(editing);
+  save();renderEmployees();$('#empModal').classList.remove('open');toast('Funcionário salvo');
+};
+
+let confirmCb=null;
+function confirmBox(msg,cb){$('#confirmMsg').textContent=msg;confirmCb=cb;$('#confirmModal').classList.add('open');}
+$('#cNo').onclick=()=>$('#confirmModal').classList.remove('open');
+$('#cYes').onclick=()=>{$('#confirmModal').classList.remove('open');confirmCb&&confirmCb();};
+
+/* ---------- MOTOR DE ESCALA ---------- */
+// Retorna janela disponível [lo,hi] (minutos do dia, hi pode passar de 1440) para a pessoa no dia, dentro de [s,e]; lista de intervalos bloqueados.
+function blocksFor(emp,date){
+  const iso=dIso(date),wd=dow(date),out=[];
+  emp.restrictions.forEach(r=>{
+    const hit=r.kind==='rec'?r.days.includes(wd):(iso>=r.from&&iso<=(r.to||r.from));
+    if(!hit)return;
+    if(r.type==='off')out.push([-1e9,1e9,r]);
+    else if(r.type==='after')out.push([toMin(r.time),1e9,r]);
+    else if(r.type==='before')out.push([-1e9,toMin(r.time),r]);
+    else if(r.type==='between'){let a=toMin(r.time),b=toMin(r.time2);if(b<=a)b+=1440;out.push([a,b,r]);}
+  });
+  return out;
+}
+const overlaps=(s,e,blocks)=>blocks.some(([a,b])=>s<b&&e>a);
+// maior sub-intervalo livre dentro de [s,e]
+function freeWithin(s,e,blocks){
+  let segs=[[s,e]];
+  blocks.forEach(([a,b])=>{segs=segs.flatMap(([x,y])=>{if(b<=x||a>=y)return[[x,y]];const r=[];if(a>x)r.push([x,a]);if(b<y)r.push([b,y]);return r;});});
+  segs.sort((p,q)=>(q[1]-q[0])-(p[1]-p[0]));
+  return segs[0]||null;
+}
+function slotsFor(day){
+  const c=state.company,s=toMin(day.start);let e=toMin(day.end);if(e<=s)e+=1440;
+  const L=Math.round(c.shiftHours*60),W=e-s;
+  if(W<=L)return[[s,e]];
+  const n=Math.ceil(W/L),slots=[];
+  for(let i=0;i<n;i++){const st=s+Math.round(i*(W-L)/(n-1)/15)*15;slots.push([st,Math.min(st+L,e)]);}
+  slots[n-1]=[e-L,e];
+  return slots;
+}
+function generate(start,end){
+  const c=state.company,emps=state.employees.filter(e=>e.active);
+  const assign={}; // empId -> iso -> {s,e,partial}
+  const gaps=[],stats={};
+  emps.forEach(e=>{assign[e.id]={};stats[e.id]={total:0,days:0};});
+  let week={},lastEnd={};
+  for(let d=new Date(start);d<=end;d=addDays(d,1)){
+    if(dow(d)===0||!Object.keys(week).length){week={};emps.forEach(e=>week[e.id]={h:0,d:0});}
+    const iso=dIso(d),day=c.days[dow(d)];
+    if(!day.open)continue;
+    const dayAbs=Math.round((d-start)/864e5)*1440;
+    const slots=slotsFor(day);
+    const busy=new Set();
+    slots.forEach(([s,e])=>{
+      for(let k=0;k<day.minStaff;k++){
+        const can=(emp,ss,ee)=>{
+          if(busy.has(emp.id))return false;
+          const w=week[emp.id];
+          if(w.d>=emp.maxDays||w.h+(ee-ss)/60>emp.maxHours+1e-9)return false;
+          if(lastEnd[emp.id]!=null&&dayAbs+ss-lastEnd[emp.id]<c.minRest*60)return false;
+          return true;
+        };
+        const rank=(a,b)=>(week[a.id].h-week[b.id].h)||(stats[a.id].total-stats[b.id].total)||a.name.localeCompare(b.name);
+        let pool=emps.filter(emp=>can(emp,s,e)&&!overlaps(s,e,blocksFor(emp,d))).sort(rank);
+        let pick=pool[0],ps=s,pe=e,partial=false;
+        if(!pick){
+          // turno parcial dentro da disponibilidade
+          const opts=emps.map(emp=>{const f=freeWithin(s,e,blocksFor(emp,d));return f&&f[1]-f[0]>=c.minPartial*60&&can(emp,f[0],f[1])?{emp,f}:null;}).filter(Boolean)
+            .sort((x,y)=>((y.f[1]-y.f[0])-(x.f[1]-x.f[0]))||rank(x.emp,y.emp));
+          if(opts.length){pick=opts[0].emp;[ps,pe]=opts[0].f;partial=true;
+            if(ps>s)gaps.push({iso,s,e:ps});if(pe<e)gaps.push({iso,s:pe,e});}
+        }
+        if(!pick){gaps.push({iso,s,e});continue;}
+        busy.add(pick.id);
+        assign[pick.id][iso]={s:ps,e:pe,partial};
+        const h=(pe-ps)/60;week[pick.id].h+=h;week[pick.id].d++;stats[pick.id].total+=h;stats[pick.id].days++;
+        lastEnd[pick.id]=dayAbs+pe;
+      }
+    });
+  }
+  return {start:dIso(start),end:dIso(end),assign,gaps,empIds:emps.map(e=>e.id)};
+}
+
+/* ---------- RENDER ESCALA ---------- */
+let current=null;
+function coverage(iso){
+  const day=state.company.days[dow(parseIso(iso))];if(!day.open)return null;
+  const s=toMin(day.start);let e=toMin(day.end);if(e<=s)e+=1440;
+  let minc=Infinity;
+  for(let t=s;t<e;t+=15){let n=0;current.empIds.forEach(id=>{const a=current.assign[id]?.[iso];if(a&&a.s<=t&&a.e>t)n++;});minc=Math.min(minc,n);}
+  return {min:minc,need:day.minStaff};
+}
+function renderSchedule(){
+  if(!current)return;
+  state.schedule=current;save();
+  const start=parseIso(current.start),end=parseIso(current.end);
+  const emps=current.empIds.map(id=>state.employees.find(e=>e.id===id)).filter(Boolean);
+  // agrupar por semana
+  const weeks=[];let wk=[];
+  for(let d=new Date(start);d<=end;d=addDays(d,1)){if(dow(d)===0&&wk.length){weeks.push(wk);wk=[];}wk.push(new Date(d));}
+  if(wk.length)weeks.push(wk);
+  const outside=state.employees.filter(e=>!current.empIds.includes(e.id)).sort((a,b)=>a.name.localeCompare(b.name));
+  let html=`<div class="card row" style="padding:12px 18px"><b>Pessoas nesta escala:</b> ${emps.length}
+    ${outside.length?`<select id="addSel">${outside.map(e=>`<option value="${e.id}">${esc(e.name)}${e.active?'':' (inativo)'}</option>`).join('')}</select><button class="btn sm" id="btnAddPerson">+ Adicionar à escala</button>`:'<span class="muted">Todos os cadastrados já estão na escala.</span>'}
+    <span class="muted" style="margin-left:auto">Clique num turno para trocar a pessoa ou o horário. Clique numa folga para escalar alguém.</span></div>`;
+  if(state.viewMode==='simple'){html+=renderSimple(weeks,emps);}
+  else weeks.forEach(days=>{
+    html+=`<div class="card weekblock"><h4>Semana de ${brDate(days[0])} a ${brDate(days[days.length-1])}</h4><div class="sched-wrap"><table class="sched"><tr><th class="name">Funcionário</th>`;
+    days.forEach(d=>{const op=state.company.days[dow(d)].open;html+=`<th class="${op?'':'closed'}">${DAYS[dow(d)]}<small>${brDate(d)}</small></th>`;});
+    html+='<th>Horas</th></tr>';
+    emps.forEach(e=>{
+      let h=0;html+=`<tr><td class="name"><button class="btn sm danger" style="float:right;padding:0 7px" title="Tirar da escala" data-rmp="${e.id}">×</button><b>${esc(e.name)}</b><br><span class="muted" style="font-size:12px">${esc(e.role||'')}</span></td>`;
+      days.forEach(d=>{
+        const iso=dIso(d),a=current.assign[e.id][iso],op=state.company.days[dow(d)].open;
+        if(a){h+=(a.e-a.s)/60;html+=`<td class="shift ${a.partial?'partial':''}" data-e="${e.id}" data-d="${iso}">${fmt(a.s)}<br>${fmt(a.e)}</td>`;}
+        else if(!op)html+='<td class="closed">fechado</td>';
+        else{const bl=blocksFor(e,d).some(b=>b[0]<-1e8&&b[1]>1e8);html+=bl?`<td class="blocked" data-e="${e.id}" data-d="${iso}" title="Indisponível">indisp.</td>`:`<td class="off" data-e="${e.id}" data-d="${iso}">folga</td>`;}
+      });
+      html+=`<td><b>${h.toFixed(1).replace('.0','')}</b><span class="muted">/${e.maxHours}</span></td></tr>`;
+    });
+    html+='<tr class="cov"><td class="name">Cobertura mínima</td>';
+    days.forEach(d=>{const cv=coverage(dIso(d));html+=cv?`<td><span class="pill ${cv.min>=cv.need?'ok':'bad'}">${cv.min}/${cv.need}</span></td>`:'<td class="closed">-</td>';});
+    html+='<td></td></tr></table></div></div>';
+  });
+  if(state.viewMode==='simple')html+=`<p class="muted">Manhã é o turno que começa na abertura, Tarde é o que vai até o fechamento e Intermediário é o que fica no meio do dia. Nomes em laranja são turnos parciais. Clique em um nome para trocar a pessoa ou o horário. Passe o mouse para ver o horário exato.</p>`;
+  else html+=`<div class="legend"><span style="--c:var(--accent-soft)">Turno completo</span><span style="--c:var(--warn-soft)">Turno parcial (por restrição)</span><span style="--c:var(--line)">Indisponível o dia todo</span><span style="--c:var(--ok-soft)">Cobertura atendida</span><span style="--c:var(--bad-soft)">Falta gente</span></div>
+  <p class="muted">Clique em qualquer célula para ajustar ou remover um turno manualmente.</p>`;
+  if(current.gaps.length){
+    const merged={};current.gaps.forEach(g=>{(merged[g.iso]=merged[g.iso]||[]).push(fmt(g.s)+' às '+fmt(g.e));});
+    html+=`<div class="card"><h3>Lacunas de cobertura (geração automática)</h3>${Object.entries(merged).map(([iso,l])=>`<div style="margin-bottom:6px"><b>${DAYS[dow(parseIso(iso))]} ${brDate(parseIso(iso))}</b>: ${[...new Set(l)].map(x=>`<span class="pill bad">${x}</span>`).join('')}</div>`).join('')}
+    <p class="muted" style="margin:8px 0 0">Para resolver: cadastre mais pessoas, aumente limites semanais, reduza a cobertura mínima ou revise as restrições.</p></div>`;
+  }
+  $('#schedOut').innerHTML=html;
+  // stats
+  let totalH=0,shifts=0;emps.forEach(e=>Object.values(current.assign[e.id]).forEach(a=>{totalH+=(a.e-a.s)/60;shifts++;}));
+  let covOk=0,covN=0;for(let d=new Date(start);d<=end;d=addDays(d,1)){const cv=coverage(dIso(d));if(cv){covN++;if(cv.min>=cv.need)covOk++;}}
+  $('#schedStats').innerHTML=`<div class="stats"><div class="stat"><b>${emps.length}</b><span>pessoas na escala</span></div><div class="stat"><b>${shifts}</b><span>turnos</span></div><div class="stat"><b>${totalH.toFixed(0)} h</b><span>horas alocadas</span></div><div class="stat"><b>${covOk}/${covN}</b><span>dias com cobertura completa</span></div></div>`;
+  $('#schedOut').querySelectorAll('[data-e][data-d]').forEach(td=>td.onclick=()=>openCell(td.dataset.e,td.dataset.d));
+  const ab=$('#btnAddPerson');
+  if(ab)ab.onclick=()=>{const id=$('#addSel').value;current.empIds.push(id);current.assign[id]=current.assign[id]||{};renderSchedule();toast('Pessoa adicionada. Clique nas folgas para escalar.');};
+  $('#schedOut').querySelectorAll('[data-rmp]').forEach(b=>b.onclick=ev=>{ev.stopPropagation();
+    const e=state.employees.find(x=>x.id===b.dataset.rmp);
+    confirmBox(`Tirar ${e.name} desta escala? Os turnos dela serão apagados.`,()=>{current.empIds=current.empIds.filter(x=>x!==e.id);delete current.assign[e.id];renderSchedule();toast('Pessoa removida da escala');});});
+}
+
+/* visualização simplificada, no formato da planilha impressa */
+const yy=d=>brDate(d)+'/'+String(d.getFullYear()).slice(2);
+const firstName=n=>n.trim().split(/\s+/)[0];
+function periodOf(a,day){
+  const s=toMin(day.start);let e=toMin(day.end);if(e<=s)e+=1440;
+  if(a.s<=s+60)return 0; // começa na abertura
+  if(a.e>=e-60)return 2; // vai até o fechamento
+  const mid=(a.s+a.e)/2,third=(e-s)/3;
+  return mid<s+third?0:mid<s+2*third?1:2;
+}
+function renderSimple(weeks,emps){
+  const PER=['MANHÃ','INTERMEDIÁRIO','TARDE'];
+  let h='<div class="simple-wrap"><table class="simple">';
+  weeks.forEach(days=>{
+    // preencher a semana inteira (Seg a Dom) mesmo no recorte mensal
+    const m=monday(days[0]),full=[0,1,2,3,4,5,6].map(i=>addDays(m,i));
+    const inRange=d=>dIso(d)>=current.start&&dIso(d)<=current.end;
+    const cols=full.map(d=>{
+      const iso=dIso(d),day=state.company.days[dow(d)];
+      if(!inRange(d)||!day.open)return{iso,closed:true,per:[[],[],[]],folga:[]};
+      const per=[[],[],[]],folga=[];
+      emps.forEach(e=>{const a=current.assign[e.id][iso];if(a)per[periodOf(a,day)].push({e,a});else folga.push(e);});
+      per.forEach(l=>l.sort((x,y)=>x.a.s-y.a.s||x.e.name.localeCompare(y.e.name)));
+      return{iso,per,folga};
+    });
+    h+=`<tr class="wk"><th colspan="8">${yy(days[0])} A ${yy(days[days.length-1])}</th></tr>
+    <tr class="hd"><th>COLABORADOR</th>${['SEGUNDA','TERÇA','QUARTA','QUINTA','SEXTA','SÁBADO','DOMINGO'].map(x=>`<th>${x}</th>`).join('')}</tr>`;
+    PER.forEach((p,pi)=>{
+      const n=Math.max(1,...cols.map(c=>c.per[pi].length));
+      for(let r=0;r<n;r++){
+        h+=`<tr>${r===0?`<td class="per" rowspan="${n}">${p}</td>`:''}`;
+        cols.forEach(c=>{
+          const it=c.per[pi][r];
+          h+=c.closed?'<td class="closed"></td>':it?`<td><span class="nm ${it.a.partial?'partial':''}" data-e="${it.e.id}" data-d="${c.iso}" title="${esc(it.e.name)}: ${fmt(it.a.s)} às ${fmt(it.a.e)}">${esc(firstName(it.e.name))}</span></td>`:'<td></td>';
+        });
+        h+='</tr>';
+      }
+    });
+    h+=`<tr class="folga"><td class="per">FOLGA</td>${cols.map(c=>c.closed?'<td class="closed"></td>':`<td>${c.folga.map(e=>`<span class="nm" data-e="${e.id}" data-d="${c.iso}" title="Clique para escalar ${esc(e.name)}">${esc(firstName(e.name))}</span>`).join('')}</td>`).join('')}</tr>`;
+  });
+  return h+'</table></div>';
+}
+
+let cellCtx=null;
+function openCell(eid,iso){
+  const e=state.employees.find(x=>x.id===eid),a=current.assign[eid][iso],d=parseIso(iso),day=state.company.days[dow(d)];
+  cellCtx={eid,iso};
+  $('#cellTitle').textContent=`${DAYS_FULL[dow(d)]} ${brDate(d)}`;
+  $('#cPerson').innerHTML=current.empIds.map(id=>state.employees.find(x=>x.id===id)).filter(Boolean).sort((x,y)=>x.name.localeCompare(y.name)).map(p=>{
+    const has=current.assign[p.id][iso],full=blocksFor(p,d).some(b=>b[0]<-1e8&&b[1]>1e8);
+    const tag=p.id===eid?'':has?` (já tem ${fmt(has.s)}-${fmt(has.e)}, troca)`:full?' (indisponível)':'';
+    return `<option value="${p.id}" ${p.id===eid?'selected':''}>${esc(p.name)}${tag}</option>`;}).join('');
+  $('#cPerson').onchange=()=>warnCell();
+  $('#cStart').value=a?fmt(a.s):day.start;$('#cEnd').value=a?fmt(a.e):fmt(Math.min(toMin(day.start)+state.company.shiftHours*60,toMin(day.end)<=toMin(day.start)?toMin(day.end)+1440:toMin(day.end)));
+  $('#cClear').style.display=a?'':'none';
+  warnCell();
+  $('#cellModal').classList.add('open');
+}
+function weekHours(eid,iso){
+  const m=monday(parseIso(iso));let h=0;
+  for(let i=0;i<7;i++){const a=current.assign[eid][dIso(addDays(m,i))];if(a)h+=(a.e-a.s)/60;}
+  return h;
+}
+function warnCell(){
+  const p=state.employees.find(x=>x.id===$('#cPerson').value),d=parseIso(cellCtx.iso);
+  const bl=blocksFor(p,d).map(b=>restLabel(b[2]));
+  let h=bl.length?`Restrições de ${esc(p.name)} neste dia: `+bl.map(x=>`<span class="pill warn">${x}</span>`).join(''):`${esc(p.name)} não tem restrições neste dia.`;
+  h+=`<br>Horas na semana: <b>${weekHours(p.id,cellCtx.iso).toFixed(1).replace('.0','')}</b> de ${p.maxHours}.`;
+  $('#cellWarn').innerHTML=h;
+}
+$('#cCancel').onclick=()=>$('#cellModal').classList.remove('open');
+$('#cClear').onclick=()=>{delete current.assign[cellCtx.eid][cellCtx.iso];$('#cellModal').classList.remove('open');renderSchedule();toast('Turno removido');};
+$('#cSave').onclick=()=>{
+  let s=toMin($('#cStart').value),e=toMin($('#cEnd').value);if(s==null||e==null)return;if(e<=s)e+=1440;
+  const {eid,iso}=cellCtx,to=$('#cPerson').value,d=parseIso(iso);
+  const emp=state.employees.find(x=>x.id===to);
+  let msg='Turno ajustado';
+  if(to!==eid){
+    const other=current.assign[to][iso],mine=current.assign[eid][iso];
+    delete current.assign[eid][iso];
+    if(other&&mine){current.assign[eid][iso]=other;msg='Turnos trocados entre as duas pessoas';}
+    else msg=`Turno passado para ${emp.name}`;
+    const o=state.employees.find(x=>x.id===eid);
+    if(current.assign[eid][iso]&&overlaps(other.s,other.e,blocksFor(o,d)))msg+='. Atenção: conflito de restrição para '+o.name;
+  }
+  current.assign[to][iso]={s,e,partial:false};
+  $('#cellModal').classList.remove('open');renderSchedule();
+  if(overlaps(s,e,blocksFor(emp,d)))msg+='. Atenção: conflita com restrição de '+emp.name;
+  if(weekHours(to,iso)>emp.maxHours)msg+='. Passou do limite semanal';
+  toast(msg);
+};
+
+/* ---------- controles de escala ---------- */
+$('#viewMode').onchange=()=>{state.viewMode=$('#viewMode').value;save();renderSchedule();};
+$('#mode').onchange=()=>{const m=$('#mode').value==='month';$('#f-week').style.display=m?'none':'';$('#f-month').style.display=m?'':'none';};
+$('#weekDate').value=dIso(monday(addDays(new Date(),7)));
+$('#monthDate').value=(()=>{const d=new Date();d.setMonth(d.getMonth()+1);return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');})();
+$('#btnGen').onclick=()=>{
+  if(!state.employees.some(e=>e.active)){toast('Cadastre funcionários primeiro');return;}
+  let s,e;
+  if($('#mode').value==='week'){if(!$('#weekDate').value)return;s=monday(parseIso($('#weekDate').value));e=addDays(s,6);}
+  else{if(!$('#monthDate').value)return;const[y,m]=$('#monthDate').value.split('-').map(Number);s=new Date(y,m-1,1);e=new Date(y,m,0);}
+  current=generate(s,e);renderSchedule();toast('Escala gerada');
+};
+$('#btnCsv').onclick=async()=>{
+  if(!current){toast('Gere uma escala primeiro');return;}
+  const dates=[];for(let d=parseIso(current.start);d<=parseIso(current.end);d=addDays(d,1))dates.push(dIso(d));
+  let csv='Funcionario;Cargo;'+dates.map(i=>DAYS[dow(parseIso(i))]+' '+brDate(parseIso(i))).join(';')+'\n';
+  current.empIds.forEach(id=>{const e=state.employees.find(x=>x.id===id);if(!e)return;csv+=[e.name,e.role||'',...dates.map(i=>{const a=current.assign[id][i];return a?fmt(a.s)+'-'+fmt(a.e):'';})].join(';')+'\n';});
+  try{await navigator.clipboard.writeText(csv);toast('CSV copiado, cole no Excel ou Planilhas');}catch(err){$('#jsonBox').value=csv;document.querySelector('[data-view=dados]').click();toast('Não foi possível copiar, o CSV está na aba Dados');}
+};
+
+/* ---------- DADOS ---------- */
+$('#btnExport').onclick=()=>{$('#jsonBox').value=JSON.stringify(state,null,2);toast('JSON gerado');};
+$('#btnCopyJson').onclick=async()=>{if(!$('#jsonBox').value)$('#jsonBox').value=JSON.stringify(state,null,2);try{await navigator.clipboard.writeText($('#jsonBox').value);toast('Copiado');}catch(e){$('#jsonBox').select();toast('Selecione e copie manualmente');}};
+$('#btnImport').onclick=()=>{
+  try{const d=JSON.parse($('#jsonBox').value);if(!d.company||!Array.isArray(d.employees))throw 0;
+    confirmBox('Substituir todos os dados atuais pelo JSON colado?',()=>{state=d;save();renderAll();current=null;$('#schedOut').innerHTML='<div class="card empty">Dados importados. Gere a escala novamente.</div>';$('#schedStats').innerHTML='';toast('Dados importados');});
+  }catch(e){toast('JSON inválido');}
+};
+$('#btnReset').onclick=()=>confirmBox('Apagar tudo e voltar aos dados de exemplo?',()=>{state=seed();save();renderAll();current=null;$('#schedOut').innerHTML='<div class="card empty">Nenhuma escala gerada ainda.</div>';$('#schedStats').innerHTML='';toast('Dados de exemplo restaurados');});
+
+document.querySelectorAll('.modal-bg').forEach(m=>m.addEventListener('click',e=>{if(e.target===m)m.classList.remove('open');}));
+document.addEventListener('keydown',e=>{if(e.key==='Escape')document.querySelectorAll('.modal-bg.open').forEach(m=>m.classList.remove('open'));});
+
+function renderAll(){renderCompany();renderEmployees();}
+load();renderAll();
+$('#viewMode').value=state.viewMode||'detail';
+if(state.schedule){current=state.schedule;current.empIds=current.empIds.filter(id=>state.employees.some(e=>e.id===id));renderSchedule();}
+</script>
+</body>
+</html>
