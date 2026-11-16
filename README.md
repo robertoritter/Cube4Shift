@@ -8,6 +8,18 @@
 
 A web app for building weekly and monthly work schedules.
 
+### Screenshots
+
+| Weekly schedule, detailed view | Board view, dark theme |
+|---|---|
+| ![Detailed weekly schedule with holiday, coverage and flagged conflicts](screenshots/schedule-detailed.png) | ![Board view with one card per shift, colored by person](screenshots/schedule-board-dark.png) |
+
+| Monthly schedule printed on one A4 sheet | Employee editor |
+|---|---|
+| ![Simplified monthly schedule printed on a single landscape A4 page](screenshots/print-month-a4.png) | ![Employee editor with preferred days off and restrictions](screenshots/employee-editor.png) |
+
+![Company settings: holidays, rules by role and working-time rules](screenshots/company-settings.png)
+
 ### Features
 
 - **Company:** opening hours for each weekday (may run past midnight), how many people must work at the same time, shift length, minimum partial shift and minimum rest between shifts.
@@ -53,6 +65,10 @@ Open `index.html` in a browser. It is a single self-contained file (the Cube4Cod
 ## Português
 
 Aplicação web para montar escalas de trabalho semanais e mensais.
+
+### Imagens
+
+As imagens do produto estão na seção em inglês acima, com a interface em inglês (o idioma pode ser trocado para português no menu do cabeçalho).
 
 ### Funcionalidades
 
